@@ -227,9 +227,7 @@ typedef enum
     channel_FVR_buf2 =  0x3f,
     HOUSEHOLD =  0xa,
     MAINS =  0xb,
-    STARTER =  0xc,
-    TEMPERATURE =  0x17,
-    channel_ANA0 =  0x0
+    STARTER =  0xc
 } adcc_channel_t;
 
 /**

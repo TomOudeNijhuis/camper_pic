@@ -1,17 +1,14 @@
 /**
- * System Driver Header File
+ * TIMER Toggle LED - Callback Example Driver File
  * 
- * @file system.h
+ * @file timer_example.c
  * 
- * @defgroup systemdriver System Driver
+ * @addtogroup timer_example
  * 
- * @brief This file contains the API prototype for the System driver.
+ * @brief This is the generated example implementation for TIMER Toggle LED - Callback driver.
  *
- * @version Driver Version 1.0.2
- *
- * @version Package Version 1.0.2
+ * @version TIMER Toggle LED - Callback Example Version 1.0.0
 */
-
 /*
 © [2024] Microchip Technology Inc. and its subsidiaries.
 
@@ -33,31 +30,33 @@
     THIS SOFTWARE.
 */
 
-#ifndef SYSTEM_H
-#define	SYSTEM_H
+/* Use Case 1 - Callback implementation. Copy this code to your project source, e.g., to main.c  */
+/* ------------------------------------------------------------------
 
-#include <xc.h>
-#include <stdint.h>
-#include <stdbool.h>
-#include "config_bits.h"
-#include "../system/pins.h"
-#include "../adcc/adcc.h"
-#include "../uart/eusart1.h"
-#include "../fvr/fvr.h"
-#include "../timer/tmr0.h"
-#include "../system/interrupt.h"
-#include "../system/clock.h"
+#include "mcc_generated_files/system/system.h"
 
-/**
- * @ingroup systemdriver
- * @brief Initializes the system module.
- * This routine is called only once during system initialization, before calling other APIs.
- * @param None.
- * @return None.
-*/
-void SYSTEM_Initialize(void);
+static void Timer_Callback(void);
 
-#endif //SYSTEM_H
+static const struct TMR_INTERFACE *Timer = &Timer0; // TODO: Replace Timer0 with name of const struct TMR_INTERFACE, from MCC Generated Files > timer > tmrx.c
+
+static void Timer_Callback(void)
+{
+    IO_LED_Toggle();
+    IO_Debug_Toggle();
+}
+
+int main(void)
+{
+    SYSTEM_Initialize();
+    Timer->TimeoutCallbackRegister(Timer_Callback);
+    INTERRUPT_GlobalInterruptEnable();
+    INTERRUPT_PeripheralInterruptEnable();
+
+    while (1) 
+    {
+    }
+}
+------------------------------------------------------------------ */
 /**
  End of File
 */

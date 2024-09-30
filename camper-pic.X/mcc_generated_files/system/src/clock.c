@@ -44,7 +44,7 @@ void CLOCK_Initialize(void)
         | (0 << _OSCEN_LFOEN_POSN)   // LFOEN disabled
         | (0 << _OSCEN_SOSCEN_POSN)   // SOSCEN disabled
         | (0 << _OSCEN_ADOEN_POSN);  // ADOEN disabled
-    OSCFRQ = (2 << _OSCFRQ_FRQ_POSN);  // FRQ 4_MHz
+    OSCFRQ = (5 << _OSCFRQ_FRQ_POSN);  // FRQ 32_MHz
     OSCTUNE = (0 << _OSCTUNE_TUN_POSN);  // TUN 0x20
     ACTCON = (0 << _ACTCON_ACTEN_POSN)   // ACTEN disabled
         | (0 << _ACTCON_ACTUD_POSN)   // ACTUD enabled

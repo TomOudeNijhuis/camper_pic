@@ -40,10 +40,10 @@
   Section: Macro Declarations
 */
 
-#define EUSART1_TX_BUFFER_SIZE (8U) //buffer size should be 2^n
+#define EUSART1_TX_BUFFER_SIZE (64U) //buffer size should be 2^n
 #define EUSART1_TX_BUFFER_MASK (EUSART1_TX_BUFFER_SIZE - 1U) 
 
-#define EUSART1_RX_BUFFER_SIZE (8U) //buffer size should be 2^n
+#define EUSART1_RX_BUFFER_SIZE (64U) //buffer size should be 2^n
 #define EUSART1_RX_BUFFER_MASK (EUSART1_RX_BUFFER_SIZE - 1U)
 
 /**
@@ -133,10 +133,10 @@ void EUSART1_Initialize(void)
     RC1STA = 0x90; 
     //TX9D 0x0; BRGH hi_speed; SENDB sync_break_complete; SYNC asynchronous; TXEN enabled; TX9 8-bit; CSRC client; 
     TX1STA = 0x26; 
-    //SPBRGL 103; 
-    SP1BRGL = 0x67; 
-    //SPBRGH 0; 
-    SP1BRGH = 0x0; 
+    //SPBRGL 160; 
+    SP1BRGL = 0xA0; 
+    //SPBRGH 1; 
+    SP1BRGH = 0x1; 
 
     EUSART1_FramingErrorCallbackRegister(EUSART1_DefaultFramingErrorCallback);
     EUSART1_OverrunErrorCallbackRegister(EUSART1_DefaultOverrunErrorCallback);

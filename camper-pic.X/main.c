@@ -32,7 +32,17 @@
     EXCEED AMOUNT OF FEES, IF ANY, YOU PAID DIRECTLY TO MICROCHIP FOR 
     THIS SOFTWARE.
 */
+#include <string.h>
+#include <stdio.h>
 #include "mcc_generated_files/system/system.h"
+#include "drivers/neopixels.h"
+
+#define BUFFER_SIZE 64
+char rx_buffer[BUFFER_SIZE];
+uint8_t buffer_index = 0;
+
+// Function to handle received commands
+void handle_command(char *command);
 
 /*
     Main application
@@ -41,10 +51,12 @@
 int main(void)
 {
     SYSTEM_Initialize();
-    // If using interrupts in PIC18 High/Low Priority Mode you need to enable the Global High and Low Interrupts 
-    // If using interrupts in PIC Mid-Range Compatibility Mode you need to enable the Global and Peripheral Interrupts 
-    // Use the following macros to: 
-
+    SWITCH1_SetDigitalInput();
+    SWITCH2_SetDigitalInput();
+    NEOPIXEL_SetDigitalOutput();
+    
+    EUSART1_Enable();
+            
     // Enable the Global Interrupts 
     INTERRUPT_GlobalInterruptEnable(); 
 
@@ -57,8 +69,43 @@ int main(void)
     // Disable the Peripheral Interrupts 
     //INTERRUPT_PeripheralInterruptDisable(); 
 
+    printf("Terminal Ready.\r\n");
 
+    neopixel_send_color(255, 0, 0);  // Red color
+    neopixel_send_color(0, 255, 0);  // Green color
+    neopixel_reset();
+    
     while(1)
     {
+        if (EUSART1_IsRxReady()) {
+            char received_char = EUSART1_Read();  // Read a character from EUSART buffer
+
+            // If we receive '\n' or '\r', treat it as the end of a command
+            if (received_char == '\n' || received_char == '\r') {
+                rx_buffer[buffer_index] = '\0';  // Null-terminate the string
+                handle_command(rx_buffer);       // Process the received command
+                buffer_index = 0;                // Reset buffer index
+            } else {
+                // Store the character in the buffer
+                if (buffer_index < (BUFFER_SIZE - 1)) {
+                    rx_buffer[buffer_index++] = received_char;
+                }
+            }
+        }
     }    
+}
+
+// Function to handle received commands
+void handle_command(char *command) {
+    if (strcmp(command, "LEDS GREEN") == 0) {
+        neopixel_send_color(0, 255, 0);
+        neopixel_send_color(0, 255, 0);
+        neopixel_reset();
+        printf("LEDs to GREEN\r\n");
+    } else if (strcmp(command, "LEDS OFF") == 0) {
+        neopixel_clear();
+        printf("LEDS are OFF\r\n");
+    } else {
+        printf("Unknown command: %s\r\n", command);
+    }
 }
