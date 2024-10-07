@@ -55,13 +55,6 @@
             <itemPath>mcc_generated_files/adcc/src/adcc.c</itemPath>
           </logicalFolder>
         </logicalFolder>
-        <logicalFolder name="examples" displayName="examples" projectFiles="true">
-          <logicalFolder name="TIMER_Example"
-                         displayName="TIMER_Example"
-                         projectFiles="true">
-            <itemPath>mcc_generated_files/examples/TIMER_Example/timer_example.c</itemPath>
-          </logicalFolder>
-        </logicalFolder>
         <logicalFolder name="fvr" displayName="fvr" projectFiles="true">
           <logicalFolder name="src" displayName="src" projectFiles="true">
             <itemPath>mcc_generated_files/fvr/src/fvr.c</itemPath>

@@ -3,12 +3,13 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/media/oudenijhuis/dataDisk/develop_tom/camper-pic/camper-pic.X/mcc_generated_files/nvm/src/nvm.c</file>
             <file>file:/media/oudenijhuis/dataDisk/develop_tom/camper-pic/camper-pic.X/main.c</file>
             <file>file:/media/oudenijhuis/dataDisk/develop_tom/camper-pic/camper-pic.X/drivers/src/power.c</file>
+            <file>file:/media/oudenijhuis/dataDisk/develop_tom/camper-pic/camper-pic.X/drivers/src/neopixels.c</file>
             <file>file:/media/oudenijhuis/dataDisk/develop_tom/camper-pic/camper-pic.X/mcc_generated_files/adcc/adcc.h</file>
             <file>file:/media/oudenijhuis/dataDisk/develop_tom/camper-pic/camper-pic.X/drivers/power.h</file>
-            <file>file:/media/oudenijhuis/dataDisk/develop_tom/camper-pic/camper-pic.X/mcc_generated_files/adcc/src/adcc.c</file>
+            <file>file:/media/oudenijhuis/dataDisk/develop_tom/camper-pic/camper-pic.X/drivers/neopixels.h</file>
+            <file>file:/media/oudenijhuis/dataDisk/develop_tom/camper-pic/camper-pic.X/mcc_generated_files/system/pins.h</file>
         </group>
     </open-files>
 </project-private>

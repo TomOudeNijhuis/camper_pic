@@ -2,7 +2,7 @@
 
 manifest_file_version: 1.0.0
 project: camper-pic
-creation_date: 2024-10-06T22:14:45.612+02:00[Europe/Amsterdam]
+creation_date: 2024-10-07T17:13:33.437+02:00[Europe/Amsterdam]
 operating_system: Linux
 mcc_mode: IDE
 mcc_mode_version: v6.20
@@ -17,7 +17,6 @@ mcc_content_registries: https://registry.npmjs.org/
 device_library: {library_class: com.microchip.mcc.melody.Library, name: Melody, version: 2.7.1}
 packs: {name: PIC16F1xxxx_DFP, version: 1.25.389}
 modules:
-- {name: '@mchp-mcc/example-pic-timer', type: MELODY, version: 1.0.0}
 - {name: '@mchp-mcc/main-manager', type: MELODY, version: 3.1.2}
 - {name: '@mchp-mcc/pic-8bit', type: MELODY, version: 5.28.2}
 - {name: '@mchp-mcc/pic16-configuration-bits-v4', type: MELODY, version: 1.0.2}

@@ -52,8 +52,8 @@ static void TMR0_DefaultOverflowCallback(void);
 
 void TMR0_Initialize(void){
 
-    //TMR0H 255; 
-    TMR0H = 0xFF;
+    //TMR0H 194; 
+    TMR0H = 0xC2;
 
     //TMR0L 0; 
     TMR0L = 0x0;
