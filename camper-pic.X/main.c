@@ -36,6 +36,7 @@
 #include <stdio.h>
 #include "mcc_generated_files/system/system.h"
 #include "drivers/neopixels.h"
+#include "drivers/power.h"
 
 #define BUFFER_SIZE 64
 char rx_buffer[BUFFER_SIZE];
@@ -54,6 +55,8 @@ int main(void)
     SWITCH1_SetDigitalInput();
     SWITCH2_SetDigitalInput();
     NEOPIXEL_SetDigitalOutput();
+    INT_OUT_SetDigitalOutput();
+    TP2_SetDigitalOutput();
     
     EUSART1_Enable();
             
@@ -64,22 +67,32 @@ int main(void)
     //INTERRUPT_GlobalInterruptDisable(); 
 
     // Enable the Peripheral Interrupts 
-    INTERRUPT_PeripheralInterruptEnable(); 
+ 	INTERRUPT_PeripheralInterruptEnable(); 
 
     // Disable the Peripheral Interrupts 
     //INTERRUPT_PeripheralInterruptDisable(); 
+    // INT_OUT_SetPushPull();
+    
+    INT_OUT_LAT = 1;
+    TP2_LAT = 1;
+    printf("Camper Interface Running\r\n");
+    __delay_ms(25);
 
-    printf("Terminal Ready.\r\n");
+    INT_OUT_LAT = 0;
+    TP2_LAT = 0;
 
-    neopixel_send_color(255, 0, 0);  // Red color
-    neopixel_send_color(0, 255, 0);  // Green color
+    neopixel_send_color(0xFF, 0, 0);  // Red color
+    neopixel_send_color(0, 0xFF, 0);  // Green color
     neopixel_reset();
+
+    __delay_ms(25);
     
     while(1)
     {
         if (EUSART1_IsRxReady()) {
             char received_char = EUSART1_Read();  // Read a character from EUSART buffer
-
+            putch(received_char);      // Echo character
+            
             // If we receive '\n' or '\r', treat it as the end of a command
             if (received_char == '\n' || received_char == '\r') {
                 rx_buffer[buffer_index] = '\0';  // Null-terminate the string
@@ -92,6 +105,7 @@ int main(void)
                 }
             }
         }
+                
     }    
 }
 
@@ -102,9 +116,8 @@ void handle_command(char *command) {
         neopixel_send_color(0, 255, 0);
         neopixel_reset();
         printf("LEDs to GREEN\r\n");
-    } else if (strcmp(command, "LEDS OFF") == 0) {
-        neopixel_clear();
-        printf("LEDS are OFF\r\n");
+    } else if (strcmp(command, "POWER") == 0) {
+        convert_powers();
     } else {
         printf("Unknown command: %s\r\n", command);
     }

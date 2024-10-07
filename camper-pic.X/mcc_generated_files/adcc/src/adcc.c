@@ -74,8 +74,8 @@ void ADCC_Initialize(void)
     ADACQL = 0x1;
     //ADACQH 0; 
     ADACQH = 0x0;
-    //CHS ANB2; 
-    ADPCH = 0xA;
+    //CHS VSS; 
+    ADPCH = 0x3A;
     //ADRPT 0; 
     ADRPT = 0x0;
     //ADLTHL 0; 
@@ -103,8 +103,8 @@ void ADCC_Initialize(void)
     //Clear the ADC Threshold interrupt flag
     PIR4bits.ADTIF = 0;
 
-    //ADON enabled; ADCONT disabled; ADCS FOSC; ADFM left; GO_nDONE undefined; 
-    ADCON0 = 0x81;
+    //ADON enabled; ADCONT disabled; ADCS FOSC; ADFM right; GO_nDONE undefined; 
+    ADCON0 = 0x85;
 }
 
 void ADCC_StartConversion(adcc_channel_t channel)

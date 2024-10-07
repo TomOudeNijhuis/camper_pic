@@ -89,7 +89,7 @@ void PIN_MANAGER_Initialize(void)
     */
     INLVLA = 0xFF;
     INLVLB = 0xFF;
-    INLVLC = 0xFF;
+    INLVLC = 0xEF;
     INLVLE = 0x8;
 
     /**

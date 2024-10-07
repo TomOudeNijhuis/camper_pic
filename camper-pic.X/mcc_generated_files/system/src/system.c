@@ -43,6 +43,7 @@ void SYSTEM_Initialize(void)
     ADCC_Initialize();
     EUSART1_Initialize();
     FVR_Initialize();
+    NVM_Initialize();
     Timer0_Initialize();
     INTERRUPT_Initialize();
 }

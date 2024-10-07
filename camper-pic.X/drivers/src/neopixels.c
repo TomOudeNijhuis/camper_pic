@@ -1,31 +1,32 @@
 #include "../neopixels.h"
 #include "../../mcc_generated_files/system/system.h"
 
-void neopixel_send_bit(uint8_t bit);
 void neopixel_send_byte(uint8_t byte);
 
-// Function to send a single bit to the NeoPixel
-void neopixel_send_bit(uint8_t bit) {
-    if (bit) {
-        // Send '1' bit
-        NEOPIXEL_LAT = 1;
-        T1H();
-        NEOPIXEL_LAT = 0;
-        T1L();
-    } else {
-        // Send '0' bit
-        NEOPIXEL_LAT = 1;
-        T0H();
-        NEOPIXEL_LAT = 0;
-        T0L();
+// Timing definitions for WS2812 (in clock cycles)
+// One instruction cycle = 1 / (_XTAL_FREQ / 4) = 125 ns
+#define SEND_BIT(b)             \
+    if(b) {                     \
+        NEOPIXEL_LAT = 1;            \
+        NOP(); NOP(); NOP();     /* High period for '1' bit (~0.35µs) */   \
+        NEOPIXEL_LAT = 0;            \
+    } else {                    \
+        NEOPIXEL_LAT = 1;            \
+        NOP();                  /* High period for '0' bit (~0.35µs) */  \
+        NEOPIXEL_LAT = 0;            \
+        NOP(); NOP();           /* Low period for '0' bit (~0.9µs) */    \
     }
-}
 
 // Function to send a byte to the NeoPixel
-void neopixel_send_byte(uint8_t byte) {
-    for (int8_t i = 7; i >= 0; i--) {
-        neopixel_send_bit((byte >> i) & 0x01);
-    }
+void neopixel_send_byte(uint8_t databyte) {
+    SEND_BIT(databyte & 0b10000000);
+    SEND_BIT(databyte & 0b01000000);
+    SEND_BIT(databyte & 0b00100000);
+    SEND_BIT(databyte & 0b00010000);
+    SEND_BIT(databyte & 0b00001000);
+    SEND_BIT(databyte & 0b00000100);
+    SEND_BIT(databyte & 0b00000010);
+    SEND_BIT(databyte & 0b00000001);
 }
 
 // Function to send RGB color data to the NeoPixel

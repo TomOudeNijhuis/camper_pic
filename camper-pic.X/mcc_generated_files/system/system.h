@@ -44,6 +44,7 @@
 #include "../adcc/adcc.h"
 #include "../uart/eusart1.h"
 #include "../fvr/fvr.h"
+#include "../nvm/nvm.h"
 #include "../timer/tmr0.h"
 #include "../system/interrupt.h"
 #include "../system/clock.h"
