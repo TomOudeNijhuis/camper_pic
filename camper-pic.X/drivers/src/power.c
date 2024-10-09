@@ -20,13 +20,13 @@ uint16_t temp = 0;
 uint8_t counter = 0;
 
 void powerInitialize(void) {
-    //ON_SetDigitalOutput();
-    //OFF_SetDigitalOutput();
-    //PUMP_SetDigitalOutput();
+    ON_SetDigitalOutput();
+    OFF_SetDigitalOutput();
+    PUMP_SetDigitalOutput();
     
-    //ON_LAT = 0;
-    //OFF_LAT = 0;
-    //PUMP_LAT = 0;
+    ON_LAT = 0;
+    OFF_LAT = 0;
+    PUMP_LAT = 0;
 }
 
 void convertVoltages(void) {
@@ -47,13 +47,6 @@ void convertVoltages(void) {
     adc_result = ADCC_GetSingleConversion(MAINS);
     f = (double)adc_result * (double)fvr1_value / 1023.0;
     mainsVoltage = (uint16_t)(f * RESISTOR_GAIN);
-
-    /*
-    printf( \
-        "vfr1x4: %d, h: %d, s: %d, m: %d\r\n", \
-        fvr1_value, householdVoltage, starterVoltage, mainsVoltage \
-    );
-    */
 }
 
 uint16_t getVoltage(voltage_t voltage) {
