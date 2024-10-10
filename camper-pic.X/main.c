@@ -200,15 +200,18 @@ void handle_command(char *command_str) {
         else
             param_value = 0;
         
-        if (strcmp(param_str, "CYAN") == 0) {
+        if (strcmp(param_str, "cyan") == 0) {
             neopixel_setcolor(1, CYAN, param_value);
             neopixel_overruled_counter = OVERRULE_TIME;
-        } else if (strcmp(param_str, "OLIVE") == 0) {
+            printf("NEOPIXEL1 state=%s\r\n", "cyan");
+        } else if (strcmp(param_str, "olive") == 0) {
             neopixel_setcolor(1, OLIVE, param_value);
             neopixel_overruled_counter = OVERRULE_TIME;
-        } else if (strcmp(param_str, "SILVER") == 0) {
+            printf("NEOPIXEL1 state=%s\r\n", "olive");
+        } else if (strcmp(param_str, "silver") == 0) {
             neopixel_setcolor(1, SILVER, param_value);
             neopixel_overruled_counter = OVERRULE_TIME;
+            printf("NEOPIXEL1 state=%s\r\n", "silver");
         } else {
             printf("Unknown parameter: %s\r\n", param_str);
             printf("Options are NEOPIXEL1 <color: CYAN, OLIVE, SILVER> <dutycycle: <0-10>\r\n");
@@ -219,15 +222,18 @@ void handle_command(char *command_str) {
         else
             param_value = 0;
 
-        if (strcmp(param_str, "CYAN") == 0) {
+        if (strcmp(param_str, "cyan") == 0) {
             neopixel_setcolor(2, CYAN, param_value);
             neopixel_overruled_counter = OVERRULE_TIME;
-        } else if (strcmp(param_str, "OLIVE") == 0) {
+            printf("NEOPIXEL2 state=%s\r\n", "cyan");
+        } else if (strcmp(param_str, "olive") == 0) {
             neopixel_setcolor(2, OLIVE, param_value);
+            printf("NEOPIXEL2 state=%s\r\n", "olive");
             neopixel_overruled_counter = OVERRULE_TIME;
-        } else if (strcmp(param_str, "SILVER") == 0) {
+        } else if (strcmp(param_str, "silver") == 0) {
             neopixel_setcolor(2, SILVER, param_value);
             neopixel_overruled_counter = OVERRULE_TIME;
+            printf("NEOPIXEL2 state=%s\r\n", "silver");
         } else {
             printf("Unknown parameter: %s\r\n", param_str);
             printf("Use NEOPIXEL2 <color: CYAN, OLIVE, SILVER> <dutycycle: <0-10>\r\n");
@@ -235,13 +241,13 @@ void handle_command(char *command_str) {
     } else if (strcmp(command, "HOUSEHOLD") == 0) {
         if (strcmp(param_str, "?") == 0) {
             const char* status = getHouseHoldStateStr();
-            printf("HOUSEHOLD state = %s\r\n", status);
+            printf("HOUSEHOLD state=%s\r\n", status);
         } else if ((strcmp(param_str, "0") == 0) || (strcmp(param_str, "1") == 0)) {
             param_value = (uint8_t)atoi(param_str);
             setHousehold(param_value);
 
             const char* status = getHouseHoldStateStr();
-            printf("HOUSEHOLD state = %s\r\n", status);            
+            printf("HOUSEHOLD state=%s\r\n", status);            
         } else {
             printf("Unknown parameter: %s\r\n", param_str);
             printf("Use HOUSEHOLD <state: ?, 0, 1>\r\n");
@@ -249,13 +255,13 @@ void handle_command(char *command_str) {
     } else if (strcmp(command, "PUMP") == 0) {
         if (strcmp(param_str, "?") == 0) {
             i = getPumpState();
-            printf("PUMP state = %d\r\n", i);
+            printf("PUMP state=%d\r\n", i);
         } else if ((strcmp(param_str, "0") == 0) || (strcmp(param_str, "1") == 0)) {
             param_value = (uint8_t)atoi(param_str);
             setPump(param_value);
 
             i = getPumpState();
-            printf("PUMP state = %d\r\n", i);      
+            printf("PUMP state=%d\r\n", i);      
         } else {
             printf("Unknown parameter: %s\r\n", param_str);
             printf("Use PUMP <state: ?, 0, 1>\r\n");
@@ -263,13 +269,13 @@ void handle_command(char *command_str) {
     } else if (strcmp(command, "VOLTAGE") == 0) {
         if (strcmp(param_str, "household") == 0) {
             temp = getVoltage(V_HOUSEHOLD);
-            printf("VOLTAGE household = %d\r\n", temp);      
+            printf("VOLTAGE household=%d\r\n", temp);      
         } else if (strcmp(param_str, "mains") == 0) {
             temp = getVoltage(V_MAINS);
-            printf("VOLTAGE mains = %d\r\n", temp);      
+            printf("VOLTAGE mains=%d\r\n", temp);      
         } else if (strcmp(param_str, "starter") == 0) {
             temp = getVoltage(V_STARTER);
-            printf("VOLTAGE starter = %d\r\n", temp);      
+            printf("VOLTAGE starter=%d\r\n", temp);      
         } else {
             printf("Unknown parameter: %s\r\n", param_str);
             printf("Use VOLTAGE <channel: household, mains, starter>\r\n");
@@ -277,7 +283,7 @@ void handle_command(char *command_str) {
     } else if (strcmp(command, "WATER") == 0) {
         if (strcmp(param_str, "?") == 0) {
             i = getWater();
-            printf("WATER value = %d\r\n", i);
+            printf("WATER value=%d\r\n", i);
         } else {
             printf("Unknown parameter: %s\r\n", param_str);
             printf("Use WATER <state: ?>\r\n");
@@ -285,7 +291,7 @@ void handle_command(char *command_str) {
     } else if (strcmp(command, "WASTE") == 0) {
         if (strcmp(param_str, "?") == 0) {
             i = getWaste();
-            printf("WASTE value = %d\r\n", i);
+            printf("WASTE value=%d\r\n", i);
         } else {
             printf("Unknown parameter: %s\r\n", param_str);
             printf("Use WASTE <state: ?>\r\n");
