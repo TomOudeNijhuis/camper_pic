@@ -43,7 +43,8 @@ char rx_buffer[BUFFER_SIZE];
 uint8_t buffer_index = 0;
 
 #define MAX_COMMAND_LENGTH 16
-#define OVERRULE_TIME 100
+#define OVERRULE_TIME 1800
+#define STARTUP_OVERRULE_TIME 100
 
 static const struct TMR_INTERFACE *Timer = &Timer0;
 
@@ -53,7 +54,7 @@ void handle_command(char *command);
 /*
     Main application
 */
-uint8_t neopixel_overruled_counter = 0;
+uint16_t neopixel_overruled_counter = 0;
 
 static void Timer_Callback(void)
 {
@@ -88,9 +89,9 @@ int main(void)
     INTERRUPT_GlobalInterruptEnable(); 
  	INTERRUPT_PeripheralInterruptEnable(); 
    
-    neopixel_overruled_counter = OVERRULE_TIME;
-    neopixel_setcolor(1, TEAL, 0);
-    neopixel_setcolor(2, TEAL, 0);
+    neopixel_overruled_counter = STARTUP_OVERRULE_TIME;
+    neopixel_setcolor(1, TEAL, 5);
+    neopixel_setcolor(2, TEAL, 5);
     
     INT_OUT_LAT = 1;
     printf("Camper Interface Running\r\n");
@@ -212,9 +213,13 @@ void handle_command(char *command_str) {
             neopixel_setcolor(1, SILVER, param_value);
             neopixel_overruled_counter = OVERRULE_TIME;
             printf("NEOPIXEL1 state=%s\r\n", "silver");
+        } else if (strcmp(param_str, "black") == 0) {
+            neopixel_setcolor(1, BLACK, param_value);
+            neopixel_overruled_counter = OVERRULE_TIME;
+            printf("NEOPIXEL1 state=%s\r\n", "black");
         } else {
             printf("Unknown parameter: %s\r\n", param_str);
-            printf("Options are NEOPIXEL1 <color: CYAN, OLIVE, SILVER> <dutycycle: <0-10>\r\n");
+            printf("Options are NEOPIXEL1 <color: cyan, olive, silver, black> <dutycycle: <0-10>\r\n");
         }
     } else if (strcmp(command, "NEOPIXEL2") == 0) {
         if (strlen(param2_str) > 0)
@@ -234,37 +239,49 @@ void handle_command(char *command_str) {
             neopixel_setcolor(2, SILVER, param_value);
             neopixel_overruled_counter = OVERRULE_TIME;
             printf("NEOPIXEL2 state=%s\r\n", "silver");
+        } else if (strcmp(param_str, "black") == 0) {
+            neopixel_setcolor(2, SILVER, param_value);
+            neopixel_overruled_counter = OVERRULE_TIME;
+            printf("NEOPIXEL2 state=%s\r\n", "black");
         } else {
             printf("Unknown parameter: %s\r\n", param_str);
-            printf("Use NEOPIXEL2 <color: CYAN, OLIVE, SILVER> <dutycycle: <0-10>\r\n");
+            printf("Use NEOPIXEL2 <color: cyan, olive, silver, black> <dutycycle: <0-10>\r\n");
         }
     } else if (strcmp(command, "HOUSEHOLD") == 0) {
         if (strcmp(param_str, "?") == 0) {
             const char* status = getHouseHoldStateStr();
             printf("HOUSEHOLD state=%s\r\n", status);
-        } else if ((strcmp(param_str, "0") == 0) || (strcmp(param_str, "1") == 0)) {
-            param_value = (uint8_t)atoi(param_str);
-            setHousehold(param_value);
+        } else if ((strcmp(param_str, "0") == 0) || (strcmp(param_str, "OFF") == 0)) {
+            setHousehold(0);
 
             const char* status = getHouseHoldStateStr();
-            printf("HOUSEHOLD state=%s\r\n", status);            
+            printf("HOUSEHOLD state=%s\r\n", status);
+        } else if ((strcmp(param_str, "1") == 0) || (strcmp(param_str, "ON") == 0)) {
+            setHousehold(1);
+
+            const char* status = getHouseHoldStateStr();
+            printf("HOUSEHOLD state=%s\r\n", status);    
         } else {
             printf("Unknown parameter: %s\r\n", param_str);
-            printf("Use HOUSEHOLD <state: ?, 0, 1>\r\n");
+            printf("Use HOUSEHOLD <state: ?, 0, 1, OFF, ON>\r\n");
         }
     } else if (strcmp(command, "PUMP") == 0) {
         if (strcmp(param_str, "?") == 0) {
-            i = getPumpState();
-            printf("PUMP state=%d\r\n", i);
-        } else if ((strcmp(param_str, "0") == 0) || (strcmp(param_str, "1") == 0)) {
-            param_value = (uint8_t)atoi(param_str);
-            setPump(param_value);
+            const char* status = getPumpStateStr();
+            printf("PUMP state=%s\r\n", status);
+        } else if ((strcmp(param_str, "0") == 0) || (strcmp(param_str, "OFF") == 0)) {
+            setPump(0);
 
-            i = getPumpState();
-            printf("PUMP state=%d\r\n", i);      
+            const char* status = getPumpStateStr();
+            printf("PUMP state=%s\r\n", status);      
+        }  else if ((strcmp(param_str, "1") == 0) || (strcmp(param_str, "ON") == 0)) {
+            setPump(1);
+
+            const char* status = getPumpStateStr();
+            printf("PUMP state=%s\r\n", status);      
         } else {
             printf("Unknown parameter: %s\r\n", param_str);
-            printf("Use PUMP <state: ?, 0, 1>\r\n");
+            printf("Use PUMP <state: ?, 0, 1, OFF, ON>\r\n");
         }
     } else if (strcmp(command, "VOLTAGE") == 0) {
         if (strcmp(param_str, "household") == 0) {

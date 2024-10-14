@@ -38,6 +38,7 @@ const char * getHouseHoldStateStr(void);
 void setHousehold(uint8_t state);
 
 uint8_t getPumpState(void);
+const char * getPumpStateStr(void);
 void setPump(uint8_t state);
 
 uint16_t getVoltage(voltage_t voltage);

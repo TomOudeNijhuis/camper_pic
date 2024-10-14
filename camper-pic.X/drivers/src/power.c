@@ -114,6 +114,19 @@ uint8_t getPumpState() {
     return PUMP_LAT;
 }
 
+const char * getPumpStateStr(void) {
+    uint8_t i;
+    
+    i = getPumpState();
+    
+    if (i == 0)
+        return "OFF";
+    else if (i == 1)
+        return "ON";
+    
+    return "Unknown state";
+}
+
 void setPump(uint8_t state) {
     if (state == 1) {
         PUMP_LAT = 1;
