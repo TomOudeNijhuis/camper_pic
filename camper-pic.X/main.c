@@ -240,7 +240,7 @@ void handle_command(char *command_str) {
             neopixel_overruled_counter = OVERRULE_TIME;
             printf("NEOPIXEL2 state=%s\r\n", "silver");
         } else if (strcmp(param_str, "black") == 0) {
-            neopixel_setcolor(2, SILVER, param_value);
+            neopixel_setcolor(2, BLACK, param_value);
             neopixel_overruled_counter = OVERRULE_TIME;
             printf("NEOPIXEL2 state=%s\r\n", "black");
         } else {
@@ -253,12 +253,12 @@ void handle_command(char *command_str) {
             printf("HOUSEHOLD state=%s\r\n", status);
         } else if ((strcmp(param_str, "0") == 0) || (strcmp(param_str, "OFF") == 0)) {
             setHousehold(0);
-
+            __delay_ms(100);
             const char* status = getHouseHoldStateStr();
             printf("HOUSEHOLD state=%s\r\n", status);
         } else if ((strcmp(param_str, "1") == 0) || (strcmp(param_str, "ON") == 0)) {
             setHousehold(1);
-
+            __delay_ms(100);
             const char* status = getHouseHoldStateStr();
             printf("HOUSEHOLD state=%s\r\n", status);    
         } else {
@@ -271,12 +271,12 @@ void handle_command(char *command_str) {
             printf("PUMP state=%s\r\n", status);
         } else if ((strcmp(param_str, "0") == 0) || (strcmp(param_str, "OFF") == 0)) {
             setPump(0);
-
+            __delay_ms(100);
             const char* status = getPumpStateStr();
             printf("PUMP state=%s\r\n", status);      
         }  else if ((strcmp(param_str, "1") == 0) || (strcmp(param_str, "ON") == 0)) {
             setPump(1);
-
+            __delay_ms(100);
             const char* status = getPumpStateStr();
             printf("PUMP state=%s\r\n", status);      
         } else {

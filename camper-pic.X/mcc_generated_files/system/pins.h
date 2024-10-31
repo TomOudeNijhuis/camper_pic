@@ -50,157 +50,157 @@
 #define PULL_UP_DISABLED     0
 
 // get/set IO_RA0 aliases
-#define WASTE100_TRIS                 TRISAbits.TRISA0
-#define WASTE100_LAT                  LATAbits.LATA0
-#define WASTE100_PORT                 PORTAbits.RA0
-#define WASTE100_WPU                  WPUAbits.WPUA0
-#define WASTE100_OD                   ODCONAbits.ODCA0
-#define WASTE100_ANS                  ANSELAbits.ANSA0
-#define WASTE100_SetHigh()            do { LATAbits.LATA0 = 1; } while(0)
-#define WASTE100_SetLow()             do { LATAbits.LATA0 = 0; } while(0)
-#define WASTE100_Toggle()             do { LATAbits.LATA0 = ~LATAbits.LATA0; } while(0)
-#define WASTE100_GetValue()           PORTAbits.RA0
-#define WASTE100_SetDigitalInput()    do { TRISAbits.TRISA0 = 1; } while(0)
-#define WASTE100_SetDigitalOutput()   do { TRISAbits.TRISA0 = 0; } while(0)
-#define WASTE100_SetPullup()          do { WPUAbits.WPUA0 = 1; } while(0)
-#define WASTE100_ResetPullup()        do { WPUAbits.WPUA0 = 0; } while(0)
-#define WASTE100_SetPushPull()        do { ODCONAbits.ODCA0 = 0; } while(0)
-#define WASTE100_SetOpenDrain()       do { ODCONAbits.ODCA0 = 1; } while(0)
-#define WASTE100_SetAnalogMode()      do { ANSELAbits.ANSA0 = 1; } while(0)
-#define WASTE100_SetDigitalMode()     do { ANSELAbits.ANSA0 = 0; } while(0)
+#define WATER100_TRIS                 TRISAbits.TRISA0
+#define WATER100_LAT                  LATAbits.LATA0
+#define WATER100_PORT                 PORTAbits.RA0
+#define WATER100_WPU                  WPUAbits.WPUA0
+#define WATER100_OD                   ODCONAbits.ODCA0
+#define WATER100_ANS                  ANSELAbits.ANSA0
+#define WATER100_SetHigh()            do { LATAbits.LATA0 = 1; } while(0)
+#define WATER100_SetLow()             do { LATAbits.LATA0 = 0; } while(0)
+#define WATER100_Toggle()             do { LATAbits.LATA0 = ~LATAbits.LATA0; } while(0)
+#define WATER100_GetValue()           PORTAbits.RA0
+#define WATER100_SetDigitalInput()    do { TRISAbits.TRISA0 = 1; } while(0)
+#define WATER100_SetDigitalOutput()   do { TRISAbits.TRISA0 = 0; } while(0)
+#define WATER100_SetPullup()          do { WPUAbits.WPUA0 = 1; } while(0)
+#define WATER100_ResetPullup()        do { WPUAbits.WPUA0 = 0; } while(0)
+#define WATER100_SetPushPull()        do { ODCONAbits.ODCA0 = 0; } while(0)
+#define WATER100_SetOpenDrain()       do { ODCONAbits.ODCA0 = 1; } while(0)
+#define WATER100_SetAnalogMode()      do { ANSELAbits.ANSA0 = 1; } while(0)
+#define WATER100_SetDigitalMode()     do { ANSELAbits.ANSA0 = 0; } while(0)
 // get/set IO_RA1 aliases
-#define WASTE75_TRIS                 TRISAbits.TRISA1
-#define WASTE75_LAT                  LATAbits.LATA1
-#define WASTE75_PORT                 PORTAbits.RA1
-#define WASTE75_WPU                  WPUAbits.WPUA1
-#define WASTE75_OD                   ODCONAbits.ODCA1
-#define WASTE75_ANS                  ANSELAbits.ANSA1
-#define WASTE75_SetHigh()            do { LATAbits.LATA1 = 1; } while(0)
-#define WASTE75_SetLow()             do { LATAbits.LATA1 = 0; } while(0)
-#define WASTE75_Toggle()             do { LATAbits.LATA1 = ~LATAbits.LATA1; } while(0)
-#define WASTE75_GetValue()           PORTAbits.RA1
-#define WASTE75_SetDigitalInput()    do { TRISAbits.TRISA1 = 1; } while(0)
-#define WASTE75_SetDigitalOutput()   do { TRISAbits.TRISA1 = 0; } while(0)
-#define WASTE75_SetPullup()          do { WPUAbits.WPUA1 = 1; } while(0)
-#define WASTE75_ResetPullup()        do { WPUAbits.WPUA1 = 0; } while(0)
-#define WASTE75_SetPushPull()        do { ODCONAbits.ODCA1 = 0; } while(0)
-#define WASTE75_SetOpenDrain()       do { ODCONAbits.ODCA1 = 1; } while(0)
-#define WASTE75_SetAnalogMode()      do { ANSELAbits.ANSA1 = 1; } while(0)
-#define WASTE75_SetDigitalMode()     do { ANSELAbits.ANSA1 = 0; } while(0)
+#define WATER75_TRIS                 TRISAbits.TRISA1
+#define WATER75_LAT                  LATAbits.LATA1
+#define WATER75_PORT                 PORTAbits.RA1
+#define WATER75_WPU                  WPUAbits.WPUA1
+#define WATER75_OD                   ODCONAbits.ODCA1
+#define WATER75_ANS                  ANSELAbits.ANSA1
+#define WATER75_SetHigh()            do { LATAbits.LATA1 = 1; } while(0)
+#define WATER75_SetLow()             do { LATAbits.LATA1 = 0; } while(0)
+#define WATER75_Toggle()             do { LATAbits.LATA1 = ~LATAbits.LATA1; } while(0)
+#define WATER75_GetValue()           PORTAbits.RA1
+#define WATER75_SetDigitalInput()    do { TRISAbits.TRISA1 = 1; } while(0)
+#define WATER75_SetDigitalOutput()   do { TRISAbits.TRISA1 = 0; } while(0)
+#define WATER75_SetPullup()          do { WPUAbits.WPUA1 = 1; } while(0)
+#define WATER75_ResetPullup()        do { WPUAbits.WPUA1 = 0; } while(0)
+#define WATER75_SetPushPull()        do { ODCONAbits.ODCA1 = 0; } while(0)
+#define WATER75_SetOpenDrain()       do { ODCONAbits.ODCA1 = 1; } while(0)
+#define WATER75_SetAnalogMode()      do { ANSELAbits.ANSA1 = 1; } while(0)
+#define WATER75_SetDigitalMode()     do { ANSELAbits.ANSA1 = 0; } while(0)
 // get/set IO_RA2 aliases
-#define WASTE50_TRIS                 TRISAbits.TRISA2
-#define WASTE50_LAT                  LATAbits.LATA2
-#define WASTE50_PORT                 PORTAbits.RA2
-#define WASTE50_WPU                  WPUAbits.WPUA2
-#define WASTE50_OD                   ODCONAbits.ODCA2
-#define WASTE50_ANS                  ANSELAbits.ANSA2
-#define WASTE50_SetHigh()            do { LATAbits.LATA2 = 1; } while(0)
-#define WASTE50_SetLow()             do { LATAbits.LATA2 = 0; } while(0)
-#define WASTE50_Toggle()             do { LATAbits.LATA2 = ~LATAbits.LATA2; } while(0)
-#define WASTE50_GetValue()           PORTAbits.RA2
-#define WASTE50_SetDigitalInput()    do { TRISAbits.TRISA2 = 1; } while(0)
-#define WASTE50_SetDigitalOutput()   do { TRISAbits.TRISA2 = 0; } while(0)
-#define WASTE50_SetPullup()          do { WPUAbits.WPUA2 = 1; } while(0)
-#define WASTE50_ResetPullup()        do { WPUAbits.WPUA2 = 0; } while(0)
-#define WASTE50_SetPushPull()        do { ODCONAbits.ODCA2 = 0; } while(0)
-#define WASTE50_SetOpenDrain()       do { ODCONAbits.ODCA2 = 1; } while(0)
-#define WASTE50_SetAnalogMode()      do { ANSELAbits.ANSA2 = 1; } while(0)
-#define WASTE50_SetDigitalMode()     do { ANSELAbits.ANSA2 = 0; } while(0)
+#define WATER50_TRIS                 TRISAbits.TRISA2
+#define WATER50_LAT                  LATAbits.LATA2
+#define WATER50_PORT                 PORTAbits.RA2
+#define WATER50_WPU                  WPUAbits.WPUA2
+#define WATER50_OD                   ODCONAbits.ODCA2
+#define WATER50_ANS                  ANSELAbits.ANSA2
+#define WATER50_SetHigh()            do { LATAbits.LATA2 = 1; } while(0)
+#define WATER50_SetLow()             do { LATAbits.LATA2 = 0; } while(0)
+#define WATER50_Toggle()             do { LATAbits.LATA2 = ~LATAbits.LATA2; } while(0)
+#define WATER50_GetValue()           PORTAbits.RA2
+#define WATER50_SetDigitalInput()    do { TRISAbits.TRISA2 = 1; } while(0)
+#define WATER50_SetDigitalOutput()   do { TRISAbits.TRISA2 = 0; } while(0)
+#define WATER50_SetPullup()          do { WPUAbits.WPUA2 = 1; } while(0)
+#define WATER50_ResetPullup()        do { WPUAbits.WPUA2 = 0; } while(0)
+#define WATER50_SetPushPull()        do { ODCONAbits.ODCA2 = 0; } while(0)
+#define WATER50_SetOpenDrain()       do { ODCONAbits.ODCA2 = 1; } while(0)
+#define WATER50_SetAnalogMode()      do { ANSELAbits.ANSA2 = 1; } while(0)
+#define WATER50_SetDigitalMode()     do { ANSELAbits.ANSA2 = 0; } while(0)
 // get/set IO_RA3 aliases
-#define WASTE25_TRIS                 TRISAbits.TRISA3
-#define WASTE25_LAT                  LATAbits.LATA3
-#define WASTE25_PORT                 PORTAbits.RA3
-#define WASTE25_WPU                  WPUAbits.WPUA3
-#define WASTE25_OD                   ODCONAbits.ODCA3
-#define WASTE25_ANS                  ANSELAbits.ANSA3
-#define WASTE25_SetHigh()            do { LATAbits.LATA3 = 1; } while(0)
-#define WASTE25_SetLow()             do { LATAbits.LATA3 = 0; } while(0)
-#define WASTE25_Toggle()             do { LATAbits.LATA3 = ~LATAbits.LATA3; } while(0)
-#define WASTE25_GetValue()           PORTAbits.RA3
-#define WASTE25_SetDigitalInput()    do { TRISAbits.TRISA3 = 1; } while(0)
-#define WASTE25_SetDigitalOutput()   do { TRISAbits.TRISA3 = 0; } while(0)
-#define WASTE25_SetPullup()          do { WPUAbits.WPUA3 = 1; } while(0)
-#define WASTE25_ResetPullup()        do { WPUAbits.WPUA3 = 0; } while(0)
-#define WASTE25_SetPushPull()        do { ODCONAbits.ODCA3 = 0; } while(0)
-#define WASTE25_SetOpenDrain()       do { ODCONAbits.ODCA3 = 1; } while(0)
-#define WASTE25_SetAnalogMode()      do { ANSELAbits.ANSA3 = 1; } while(0)
-#define WASTE25_SetDigitalMode()     do { ANSELAbits.ANSA3 = 0; } while(0)
+#define WATER25_TRIS                 TRISAbits.TRISA3
+#define WATER25_LAT                  LATAbits.LATA3
+#define WATER25_PORT                 PORTAbits.RA3
+#define WATER25_WPU                  WPUAbits.WPUA3
+#define WATER25_OD                   ODCONAbits.ODCA3
+#define WATER25_ANS                  ANSELAbits.ANSA3
+#define WATER25_SetHigh()            do { LATAbits.LATA3 = 1; } while(0)
+#define WATER25_SetLow()             do { LATAbits.LATA3 = 0; } while(0)
+#define WATER25_Toggle()             do { LATAbits.LATA3 = ~LATAbits.LATA3; } while(0)
+#define WATER25_GetValue()           PORTAbits.RA3
+#define WATER25_SetDigitalInput()    do { TRISAbits.TRISA3 = 1; } while(0)
+#define WATER25_SetDigitalOutput()   do { TRISAbits.TRISA3 = 0; } while(0)
+#define WATER25_SetPullup()          do { WPUAbits.WPUA3 = 1; } while(0)
+#define WATER25_ResetPullup()        do { WPUAbits.WPUA3 = 0; } while(0)
+#define WATER25_SetPushPull()        do { ODCONAbits.ODCA3 = 0; } while(0)
+#define WATER25_SetOpenDrain()       do { ODCONAbits.ODCA3 = 1; } while(0)
+#define WATER25_SetAnalogMode()      do { ANSELAbits.ANSA3 = 1; } while(0)
+#define WATER25_SetDigitalMode()     do { ANSELAbits.ANSA3 = 0; } while(0)
 // get/set IO_RA4 aliases
-#define WATER100_TRIS                 TRISAbits.TRISA4
-#define WATER100_LAT                  LATAbits.LATA4
-#define WATER100_PORT                 PORTAbits.RA4
-#define WATER100_WPU                  WPUAbits.WPUA4
-#define WATER100_OD                   ODCONAbits.ODCA4
-#define WATER100_ANS                  ANSELAbits.ANSA4
-#define WATER100_SetHigh()            do { LATAbits.LATA4 = 1; } while(0)
-#define WATER100_SetLow()             do { LATAbits.LATA4 = 0; } while(0)
-#define WATER100_Toggle()             do { LATAbits.LATA4 = ~LATAbits.LATA4; } while(0)
-#define WATER100_GetValue()           PORTAbits.RA4
-#define WATER100_SetDigitalInput()    do { TRISAbits.TRISA4 = 1; } while(0)
-#define WATER100_SetDigitalOutput()   do { TRISAbits.TRISA4 = 0; } while(0)
-#define WATER100_SetPullup()          do { WPUAbits.WPUA4 = 1; } while(0)
-#define WATER100_ResetPullup()        do { WPUAbits.WPUA4 = 0; } while(0)
-#define WATER100_SetPushPull()        do { ODCONAbits.ODCA4 = 0; } while(0)
-#define WATER100_SetOpenDrain()       do { ODCONAbits.ODCA4 = 1; } while(0)
-#define WATER100_SetAnalogMode()      do { ANSELAbits.ANSA4 = 1; } while(0)
-#define WATER100_SetDigitalMode()     do { ANSELAbits.ANSA4 = 0; } while(0)
+#define WASTE100_TRIS                 TRISAbits.TRISA4
+#define WASTE100_LAT                  LATAbits.LATA4
+#define WASTE100_PORT                 PORTAbits.RA4
+#define WASTE100_WPU                  WPUAbits.WPUA4
+#define WASTE100_OD                   ODCONAbits.ODCA4
+#define WASTE100_ANS                  ANSELAbits.ANSA4
+#define WASTE100_SetHigh()            do { LATAbits.LATA4 = 1; } while(0)
+#define WASTE100_SetLow()             do { LATAbits.LATA4 = 0; } while(0)
+#define WASTE100_Toggle()             do { LATAbits.LATA4 = ~LATAbits.LATA4; } while(0)
+#define WASTE100_GetValue()           PORTAbits.RA4
+#define WASTE100_SetDigitalInput()    do { TRISAbits.TRISA4 = 1; } while(0)
+#define WASTE100_SetDigitalOutput()   do { TRISAbits.TRISA4 = 0; } while(0)
+#define WASTE100_SetPullup()          do { WPUAbits.WPUA4 = 1; } while(0)
+#define WASTE100_ResetPullup()        do { WPUAbits.WPUA4 = 0; } while(0)
+#define WASTE100_SetPushPull()        do { ODCONAbits.ODCA4 = 0; } while(0)
+#define WASTE100_SetOpenDrain()       do { ODCONAbits.ODCA4 = 1; } while(0)
+#define WASTE100_SetAnalogMode()      do { ANSELAbits.ANSA4 = 1; } while(0)
+#define WASTE100_SetDigitalMode()     do { ANSELAbits.ANSA4 = 0; } while(0)
 // get/set IO_RA5 aliases
-#define WATER75_TRIS                 TRISAbits.TRISA5
-#define WATER75_LAT                  LATAbits.LATA5
-#define WATER75_PORT                 PORTAbits.RA5
-#define WATER75_WPU                  WPUAbits.WPUA5
-#define WATER75_OD                   ODCONAbits.ODCA5
-#define WATER75_ANS                  ANSELAbits.ANSA5
-#define WATER75_SetHigh()            do { LATAbits.LATA5 = 1; } while(0)
-#define WATER75_SetLow()             do { LATAbits.LATA5 = 0; } while(0)
-#define WATER75_Toggle()             do { LATAbits.LATA5 = ~LATAbits.LATA5; } while(0)
-#define WATER75_GetValue()           PORTAbits.RA5
-#define WATER75_SetDigitalInput()    do { TRISAbits.TRISA5 = 1; } while(0)
-#define WATER75_SetDigitalOutput()   do { TRISAbits.TRISA5 = 0; } while(0)
-#define WATER75_SetPullup()          do { WPUAbits.WPUA5 = 1; } while(0)
-#define WATER75_ResetPullup()        do { WPUAbits.WPUA5 = 0; } while(0)
-#define WATER75_SetPushPull()        do { ODCONAbits.ODCA5 = 0; } while(0)
-#define WATER75_SetOpenDrain()       do { ODCONAbits.ODCA5 = 1; } while(0)
-#define WATER75_SetAnalogMode()      do { ANSELAbits.ANSA5 = 1; } while(0)
-#define WATER75_SetDigitalMode()     do { ANSELAbits.ANSA5 = 0; } while(0)
+#define WASTE75_TRIS                 TRISAbits.TRISA5
+#define WASTE75_LAT                  LATAbits.LATA5
+#define WASTE75_PORT                 PORTAbits.RA5
+#define WASTE75_WPU                  WPUAbits.WPUA5
+#define WASTE75_OD                   ODCONAbits.ODCA5
+#define WASTE75_ANS                  ANSELAbits.ANSA5
+#define WASTE75_SetHigh()            do { LATAbits.LATA5 = 1; } while(0)
+#define WASTE75_SetLow()             do { LATAbits.LATA5 = 0; } while(0)
+#define WASTE75_Toggle()             do { LATAbits.LATA5 = ~LATAbits.LATA5; } while(0)
+#define WASTE75_GetValue()           PORTAbits.RA5
+#define WASTE75_SetDigitalInput()    do { TRISAbits.TRISA5 = 1; } while(0)
+#define WASTE75_SetDigitalOutput()   do { TRISAbits.TRISA5 = 0; } while(0)
+#define WASTE75_SetPullup()          do { WPUAbits.WPUA5 = 1; } while(0)
+#define WASTE75_ResetPullup()        do { WPUAbits.WPUA5 = 0; } while(0)
+#define WASTE75_SetPushPull()        do { ODCONAbits.ODCA5 = 0; } while(0)
+#define WASTE75_SetOpenDrain()       do { ODCONAbits.ODCA5 = 1; } while(0)
+#define WASTE75_SetAnalogMode()      do { ANSELAbits.ANSA5 = 1; } while(0)
+#define WASTE75_SetDigitalMode()     do { ANSELAbits.ANSA5 = 0; } while(0)
 // get/set IO_RA6 aliases
-#define WATER25_TRIS                 TRISAbits.TRISA6
-#define WATER25_LAT                  LATAbits.LATA6
-#define WATER25_PORT                 PORTAbits.RA6
-#define WATER25_WPU                  WPUAbits.WPUA6
-#define WATER25_OD                   ODCONAbits.ODCA6
-#define WATER25_ANS                  ANSELAbits.ANSA6
-#define WATER25_SetHigh()            do { LATAbits.LATA6 = 1; } while(0)
-#define WATER25_SetLow()             do { LATAbits.LATA6 = 0; } while(0)
-#define WATER25_Toggle()             do { LATAbits.LATA6 = ~LATAbits.LATA6; } while(0)
-#define WATER25_GetValue()           PORTAbits.RA6
-#define WATER25_SetDigitalInput()    do { TRISAbits.TRISA6 = 1; } while(0)
-#define WATER25_SetDigitalOutput()   do { TRISAbits.TRISA6 = 0; } while(0)
-#define WATER25_SetPullup()          do { WPUAbits.WPUA6 = 1; } while(0)
-#define WATER25_ResetPullup()        do { WPUAbits.WPUA6 = 0; } while(0)
-#define WATER25_SetPushPull()        do { ODCONAbits.ODCA6 = 0; } while(0)
-#define WATER25_SetOpenDrain()       do { ODCONAbits.ODCA6 = 1; } while(0)
-#define WATER25_SetAnalogMode()      do { ANSELAbits.ANSA6 = 1; } while(0)
-#define WATER25_SetDigitalMode()     do { ANSELAbits.ANSA6 = 0; } while(0)
+#define WASTE25_TRIS                 TRISAbits.TRISA6
+#define WASTE25_LAT                  LATAbits.LATA6
+#define WASTE25_PORT                 PORTAbits.RA6
+#define WASTE25_WPU                  WPUAbits.WPUA6
+#define WASTE25_OD                   ODCONAbits.ODCA6
+#define WASTE25_ANS                  ANSELAbits.ANSA6
+#define WASTE25_SetHigh()            do { LATAbits.LATA6 = 1; } while(0)
+#define WASTE25_SetLow()             do { LATAbits.LATA6 = 0; } while(0)
+#define WASTE25_Toggle()             do { LATAbits.LATA6 = ~LATAbits.LATA6; } while(0)
+#define WASTE25_GetValue()           PORTAbits.RA6
+#define WASTE25_SetDigitalInput()    do { TRISAbits.TRISA6 = 1; } while(0)
+#define WASTE25_SetDigitalOutput()   do { TRISAbits.TRISA6 = 0; } while(0)
+#define WASTE25_SetPullup()          do { WPUAbits.WPUA6 = 1; } while(0)
+#define WASTE25_ResetPullup()        do { WPUAbits.WPUA6 = 0; } while(0)
+#define WASTE25_SetPushPull()        do { ODCONAbits.ODCA6 = 0; } while(0)
+#define WASTE25_SetOpenDrain()       do { ODCONAbits.ODCA6 = 1; } while(0)
+#define WASTE25_SetAnalogMode()      do { ANSELAbits.ANSA6 = 1; } while(0)
+#define WASTE25_SetDigitalMode()     do { ANSELAbits.ANSA6 = 0; } while(0)
 // get/set IO_RA7 aliases
-#define WATER50_TRIS                 TRISAbits.TRISA7
-#define WATER50_LAT                  LATAbits.LATA7
-#define WATER50_PORT                 PORTAbits.RA7
-#define WATER50_WPU                  WPUAbits.WPUA7
-#define WATER50_OD                   ODCONAbits.ODCA7
-#define WATER50_ANS                  ANSELAbits.ANSA7
-#define WATER50_SetHigh()            do { LATAbits.LATA7 = 1; } while(0)
-#define WATER50_SetLow()             do { LATAbits.LATA7 = 0; } while(0)
-#define WATER50_Toggle()             do { LATAbits.LATA7 = ~LATAbits.LATA7; } while(0)
-#define WATER50_GetValue()           PORTAbits.RA7
-#define WATER50_SetDigitalInput()    do { TRISAbits.TRISA7 = 1; } while(0)
-#define WATER50_SetDigitalOutput()   do { TRISAbits.TRISA7 = 0; } while(0)
-#define WATER50_SetPullup()          do { WPUAbits.WPUA7 = 1; } while(0)
-#define WATER50_ResetPullup()        do { WPUAbits.WPUA7 = 0; } while(0)
-#define WATER50_SetPushPull()        do { ODCONAbits.ODCA7 = 0; } while(0)
-#define WATER50_SetOpenDrain()       do { ODCONAbits.ODCA7 = 1; } while(0)
-#define WATER50_SetAnalogMode()      do { ANSELAbits.ANSA7 = 1; } while(0)
-#define WATER50_SetDigitalMode()     do { ANSELAbits.ANSA7 = 0; } while(0)
+#define WASTE50_TRIS                 TRISAbits.TRISA7
+#define WASTE50_LAT                  LATAbits.LATA7
+#define WASTE50_PORT                 PORTAbits.RA7
+#define WASTE50_WPU                  WPUAbits.WPUA7
+#define WASTE50_OD                   ODCONAbits.ODCA7
+#define WASTE50_ANS                  ANSELAbits.ANSA7
+#define WASTE50_SetHigh()            do { LATAbits.LATA7 = 1; } while(0)
+#define WASTE50_SetLow()             do { LATAbits.LATA7 = 0; } while(0)
+#define WASTE50_Toggle()             do { LATAbits.LATA7 = ~LATAbits.LATA7; } while(0)
+#define WASTE50_GetValue()           PORTAbits.RA7
+#define WASTE50_SetDigitalInput()    do { TRISAbits.TRISA7 = 1; } while(0)
+#define WASTE50_SetDigitalOutput()   do { TRISAbits.TRISA7 = 0; } while(0)
+#define WASTE50_SetPullup()          do { WPUAbits.WPUA7 = 1; } while(0)
+#define WASTE50_ResetPullup()        do { WPUAbits.WPUA7 = 0; } while(0)
+#define WASTE50_SetPushPull()        do { ODCONAbits.ODCA7 = 0; } while(0)
+#define WASTE50_SetOpenDrain()       do { ODCONAbits.ODCA7 = 1; } while(0)
+#define WASTE50_SetAnalogMode()      do { ANSELAbits.ANSA7 = 1; } while(0)
+#define WASTE50_SetDigitalMode()     do { ANSELAbits.ANSA7 = 0; } while(0)
 // get/set IO_RB0 aliases
 #define OFF_TRIS                 TRISBbits.TRISB0
 #define OFF_LAT                  LATBbits.LATB0
