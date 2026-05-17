@@ -77,12 +77,12 @@ static void cmd_get_voltage(const protocol_frame_t *f) {
 }
 
 static void cmd_get_water(const protocol_frame_t *f) {
-    uint8_t v = getWater();
+    uint8_t v = telemetry_get_water_cached();
     protocol_send_ack(f->opcode, &v, 1);
 }
 
 static void cmd_get_waste(const protocol_frame_t *f) {
-    uint8_t v = getWaste();
+    uint8_t v = telemetry_get_waste_cached();
     protocol_send_ack(f->opcode, &v, 1);
 }
 

@@ -1,6 +1,7 @@
 #include <xc.h>
 #include "../errors.h"
 #include "../power.h"
+#include "../telemetry.h"
 
 #define HYSTERESIS_SAMPLES        5U
 #define HOUSEHOLD_SWITCH_TICKS  300U   /* ~30 s at 100 ms TMR0 cadence */
@@ -137,8 +138,8 @@ void errors_run_detectors(void) {
     uint16_t v_household = getVoltage(V_HOUSEHOLD);
     uint16_t v_starter   = getVoltage(V_STARTER);
     uint16_t v_mains     = getVoltage(V_MAINS);
-    uint8_t  water       = getWater();
-    uint8_t  waste       = getWaste();
+    uint8_t  water       = telemetry_get_water_cached();
+    uint8_t  waste       = telemetry_get_waste_cached();
     household_state_t hh = getHouseholdState();
 
     update_rule(ERR_VOLTAGE_HOUSEHOLD_LOW,

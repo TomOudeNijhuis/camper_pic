@@ -30,6 +30,21 @@ static volatile bool     sub_expired_pending;
 static uint8_t last_pushed_payload[TELEMETRY_PAYLOAD_LEN];
 static bool    last_payload_valid;
 
+/* Tank levels are only sampled once per telemetry push, to limit RC7
+ * (PULLUP) activity and slow electrochemical wear on the tank rods. The
+ * cache is seeded to a benign "tank full / waste empty" so detectors
+ * don't false-trigger before the first push happens. */
+static uint8_t cached_water = 100;
+static uint8_t cached_waste = 0;
+
+uint8_t telemetry_get_water_cached(void) {
+    return cached_water;
+}
+
+uint8_t telemetry_get_waste_cached(void) {
+    return cached_waste;
+}
+
 static void put_u16_le(uint8_t *p, uint16_t v) {
     p[0] = (uint8_t)(v & 0xFFU);
     p[1] = (uint8_t)((v >> 8) & 0xFFU);
@@ -41,6 +56,8 @@ void telemetry_init(void) {
     next_send_ticks = 0;
     sub_expired_pending = false;
     last_payload_valid = false;
+    cached_water = 100;
+    cached_waste = 0;
 }
 
 void telemetry_on_subscribe(void) {
@@ -85,8 +102,8 @@ uint8_t telemetry_build_snapshot(uint8_t *out) {
     uint16_t v_household = getVoltage(V_HOUSEHOLD);
     uint16_t v_mains     = getVoltage(V_MAINS);
     uint16_t v_starter   = getVoltage(V_STARTER);
-    uint8_t  water       = getWater();
-    uint8_t  waste       = getWaste();
+    uint8_t  water       = cached_water;
+    uint8_t  waste       = cached_waste;
     household_state_t hh = getHouseholdState();
     uint8_t  pump        = getPumpState();
     uint16_t errs        = errors_get();
@@ -152,6 +169,11 @@ void telemetry_run(void) {
         bool changed = false;
 
         (void)adc_sampler_consume();
+        /* Refresh tank cache once per push -- the only place RC7 is pulsed.
+         * Everyone else (errors, OP_GET_WATER/WASTE, snapshot) reads from
+         * the cache. */
+        cached_water = getWater();
+        cached_waste = getWaste();
         telemetry_build_snapshot(payload);
 
         if (last_payload_valid) {

@@ -74,7 +74,7 @@ static uint8_t readLevel(uint8_t s100, uint8_t s75, uint8_t s50, uint8_t s25) {
 uint8_t getWaste(void) {
     uint8_t result;
     PULLUP_LAT = 1;
-    __delay_ms(10);
+    __delay_ms(50);
     result = readLevel(WASTE100_PORT, WASTE75_PORT, WASTE50_PORT, WASTE25_PORT);
     PULLUP_LAT = 0;
     return result;
@@ -83,7 +83,7 @@ uint8_t getWaste(void) {
 uint8_t getWater(void) {
     uint8_t result;
     PULLUP_LAT = 1;
-    __delay_ms(10);
+    __delay_ms(50);
     result = readLevel(WATER100_PORT, WATER75_PORT, WATER50_PORT, WATER25_PORT);
     PULLUP_LAT = 0;
     return result;

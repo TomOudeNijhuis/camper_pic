@@ -6,5 +6,6 @@
         "gdb",
         "mplab-core-da"
     ],
-    "cmake.sourceDirectory": "/home/oudenijhuis/develop_tom/camper_pic/cmake/camper_pic/default"
+    "cmake.sourceDirectory": "/home/oudenijhuis/develop_tom/camper_pic/cmake/camper_pic/default",
+    "mplab.clangd.path": "/opt/microchip/xc8/v3.10/bin/xc8-clangd"
 }

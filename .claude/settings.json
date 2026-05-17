@@ -45,7 +45,8 @@
       "Bash(grep -iE \"_INTERRUPT_InterruptManager\\\\b|^_main\\\\b|main$|app_reset\" /home/oudenijhuis/develop_tom/camper_pic/out/camper_pic/Bootloaded.sym)",
       "Bash(awk '/cmd_set_neopixel/,/^}/' /home/oudenijhuis/develop_tom/camper_pic/My_MCC_Config/mcc/drivers/src/commands.c)",
       "Bash(awk '/SWITCH1\\\\|SWITCH2|SetDigital/ {print FILENAME\":\"NR\": \"$0}' /home/oudenijhuis/develop_tom/camper_pic/My_MCC_Config/mcc/main.c)",
-      "Bash(awk '/WPU|nWPUEN|OPTION_REG/ {print FILENAME\":\"NR\": \"$0}' /home/oudenijhuis/develop_tom/camper_pic/My_MCC_Config/mcc/mcc_generated_files/system/src/pins.c /home/oudenijhuis/develop_tom/camper_pic/My_MCC_Config/mcc/mcc_generated_files/system/src/clock.c)"
+      "Bash(awk '/WPU|nWPUEN|OPTION_REG/ {print FILENAME\":\"NR\": \"$0}' /home/oudenijhuis/develop_tom/camper_pic/My_MCC_Config/mcc/mcc_generated_files/system/src/pins.c /home/oudenijhuis/develop_tom/camper_pic/My_MCC_Config/mcc/mcc_generated_files/system/src/clock.c)",
+      "Bash(awk '/errors_run_detectors\\\\b/ {print FILENAME\":\"NR\": \"$0}' /home/oudenijhuis/develop_tom/camper_pic/My_MCC_Config/mcc/main.c /home/oudenijhuis/develop_tom/camper_pic/My_MCC_Config/mcc/drivers/src/*.c)"
     ],
     "additionalDirectories": [
       "/tmp"

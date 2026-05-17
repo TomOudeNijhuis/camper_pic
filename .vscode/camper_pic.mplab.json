@@ -56,7 +56,7 @@
         {
             "name": "Bootloaded_toolchain",
             "type": "toolchain",
-            "provider": "microchip.toolchains:xc8@2.46",
+            "provider": "microchip.toolchains:xc8@3.10",
             "properties": {
                 "compiler.isolate-each-function": true,
                 "compiler.optimization-level": "-O1",
@@ -74,7 +74,7 @@
         {
             "name": "default-XC8",
             "type": "toolchain",
-            "provider": "microchip.toolchains:xc8@2.46",
+            "provider": "microchip.toolchains:xc8@3.10",
             "properties": {
                 "compiler.isolate-each-function": true,
                 "compiler.optimization-level": "-O1",

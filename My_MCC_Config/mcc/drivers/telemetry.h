@@ -37,6 +37,14 @@ uint8_t telemetry_build_snapshot(uint8_t *out);
 
 bool telemetry_is_subscribed(void);
 
+/* Cached tank levels. RC7 is pulsed (via getWater/getWaste in power.c) only
+ * once per telemetry push -- the cache is refreshed immediately before each
+ * push, then re-used by errors_run_detectors and OP_GET_WATER/OP_GET_WASTE
+ * for the rest of the cycle. Throttling reads this way protects the tank
+ * sensor rods from electrochemical oxidation. */
+uint8_t telemetry_get_water_cached(void);
+uint8_t telemetry_get_waste_cached(void);
+
 #ifdef __cplusplus
 }
 #endif
