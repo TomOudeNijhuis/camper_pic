@@ -1,0 +1,34 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find /home/oudenijhuis/develop_tom/camper_pic -maxdepth 2 -name \".git\" 2>/dev/null; echo \"---all camper-pic dirs---\"; ls /home/oudenijhuis/develop_tom/ | grep -i camper)",
+      "Read(//home/oudenijhuis/develop_tom/**)",
+      "Bash(git -C \"/home/oudenijhuis/develop_tom/camper_pic broken\" show ff8f58d:camper-pic.X/mcc_generated_files/system/src/pins.c)",
+      "Read(//tmp/**)",
+      "Bash(git -C \"/home/oudenijhuis/develop_tom/camper_pic broken\" show ff8f58d:camper-pic.X/mcc_generated_files/adcc/adcc.h)",
+      "Bash(grep -v \"^[[:space:]]*\\\\*\\\\|//\\\\|^[[:space:]]*$\")",
+      "Bash(git -C \"/home/oudenijhuis/develop_tom/camper_pic broken\" show ff8f58d:camper-pic.X/mcc_generated_files/uart/eusart1.h)",
+      "Bash(git -C \"/home/oudenijhuis/develop_tom/camper_pic broken\" show ff8f58d:camper-pic.X/main.c)",
+      "Bash(git -C \"/home/oudenijhuis/develop_tom/camper_pic broken\" show ff8f58d:camper-pic.X/main.c > /tmp/main_working.c 2>&1; wc -l /tmp/main_working.c; echo \"---key sections---\"; grep -nE \"Timer|TMR0|tmr0|ADCC|adcc|ADC_|adc_\" /tmp/main_working.c | head -30)",
+      "Bash(cp \"/home/oudenijhuis/develop_tom/camper_pic broken/main.c\" /home/oudenijhuis/develop_tom/camper_pic/My_MCC_Config/mcc/main.c)",
+      "Bash(cp -r \"/home/oudenijhuis/develop_tom/camper_pic broken/drivers\" /home/oudenijhuis/develop_tom/camper_pic/My_MCC_Config/mcc/)",
+      "Bash(awk '/^#define / {print $2}' /home/oudenijhuis/develop_tom/camper_pic/My_MCC_Config/mcc/mcc_generated_files/system/pins.h)",
+      "Bash(grep -E \"putch|putc \" /opt/microchip/xc8/v2.46/pic/include/c99/stdio.h 2>/dev/null | head -5)",
+      "Read(//opt/microchip/xc8/v2.46/pic/include/c99/**)",
+      "Bash(/usr/bin/cmake -S /home/oudenijhuis/develop_tom/camper_pic/cmake/camper_pic/default -B /home/oudenijhuis/develop_tom/camper_pic/_build/camper_pic/default)",
+      "Bash(/usr/bin/cmake --build /home/oudenijhuis/develop_tom/camper_pic/_build/camper_pic/default)",
+      "Bash(cmake --build /home/oudenijhuis/develop_tom/camper_pic/_build/camper_pic/Bootloaded)",
+      "Bash(xxd /home/oudenijhuis/develop_tom/camper_pic/out/camper_pic/Bootloaded.hex)",
+      "Bash(/opt/microchip/mplabx/v6.30/mplab_platform/mplab-pymdfu/bin/linux/pyfwimagebuilder-bin decode *)",
+      "Bash(python3)",
+      "Bash(find /opt/microchip/xc8 -name \"pic16f18056*.h\" 2>/dev/null | head -3)",
+      "Read(//opt/microchip/xc8/**)",
+      "Bash(find /home/oudenijhuis/.mchp_packs/Microchip/PIC16F1xxxx_DFP/1.31.465/xc8/pic/include -name \"*18056*\" -o -name \"*F18056*\" 2>/dev/null | head -5)",
+      "Read(//home/oudenijhuis/.mchp_packs/Microchip/PIC16F1xxxx_DFP/1.31.465/xc8/pic/include/**)",
+      "Bash(awk '/IO_PIN_ENTRY/' /home/oudenijhuis/develop_tom/camper_pic_loader/My_MCC_Config/mcc/mcc_generated_files/bootloader/example/bl_example.c /home/oudenijhuis/develop_tom/camper_pic_loader/My_MCC_Config/mcc/mcc_generated_files/bootloader/example/bl_example.h)"
+    ],
+    "additionalDirectories": [
+      "/tmp"
+    ]
+  }
+}

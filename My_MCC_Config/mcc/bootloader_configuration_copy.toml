@@ -1,0 +1,28 @@
+# The below TOML configuration is a direct copy of the configuration file used while initializing this project.
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# MCU8 Bootloader Configuration
+
+# Configuration Data Specific to the generated bootloader
+[bootloader]
+IMAGE_FORMAT_VERSION = "0.3.0"
+PAGE_ERASE_KEY = 0xAA55
+PAGE_WRITE_KEY = 0xAA55
+PAGE_READ_KEY = 0x00
+BYTE_WRITE_KEY = 0xAA55
+DEVICE_ID = 0x000030FF
+WRITE_BLOCK_SIZE = 0x20
+FLASH_START = 0x00001000
+FLASH_END = 0x004000
+EEPROM_START = 0x00F000
+EEPROM_END = 0x00F0FF
+CONFIG_START = 0x8007
+CONFIG_END = 0x800B
+ARCH = "PIC16"
+VERIFICATION = "CRC-16"
+NUMBER_OF_APPLICATION_IMAGE = 1
+
+# Data needed by the host
+[host]
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

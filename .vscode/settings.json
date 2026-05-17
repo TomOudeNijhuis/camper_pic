@@ -1,0 +1,10 @@
+{
+    "mplab.clangd.compileCommandsDir": "${workspaceFolder}/_build/camper_pic/default",
+    "memory-inspector.debugTypes": [
+        "arm-debugger",
+        "embedded-debug",
+        "gdb",
+        "mplab-core-da"
+    ],
+    "cmake.sourceDirectory": "/home/oudenijhuis/develop_tom/camper_pic/cmake/camper_pic/default"
+}

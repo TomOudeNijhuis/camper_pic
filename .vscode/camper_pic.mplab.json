@@ -1,0 +1,172 @@
+{
+    "version": "1.9",
+    "configurations": [
+        {
+            "name": "default",
+            "id": "",
+            "device": "PIC16F18056",
+            "imagePath": "./out/camper_pic/default.elf",
+            "toolProperties": "default-tool-base",
+            "tool": "Snap",
+            "packs": [
+                {
+                    "name": "PIC16F1xxxx_DFP",
+                    "vendor": "Microchip",
+                    "version": "1.31.465"
+                }
+            ],
+            "fileSet": "default",
+            "toolchain": "default-XC8",
+            "userVariables": "default-uservariables"
+        },
+        {
+            "name": "Bootloaded",
+            "id": "",
+            "device": "PIC16F18056",
+            "imageType": "application",
+            "imagePath": "./out/camper_pic/Bootloaded.elf",
+            "toolProperties": "Bootloaded_tool",
+            "tool": "Simulator",
+            "packs": [
+                {
+                    "name": "PIC16F1xxxx_DFP",
+                    "vendor": "Microchip",
+                    "version": "1.31.465"
+                }
+            ],
+            "fileSet": "Bootloaded_files",
+            "toolchain": "Bootloaded_toolchain",
+            "userVariables": "Bootloaded-uservariables",
+            "postBuildSteps": [
+                "cd My_MCC_Config/mcc && ./postBuild.sh false Bootloaded ../../out/camper_pic production"
+            ]
+        }
+    ],
+    "propertyGroups": [
+        {
+            "name": "Bootloaded-uservariables",
+            "type": "uservariables",
+            "properties": {}
+        },
+        {
+            "name": "default-uservariables",
+            "type": "uservariables",
+            "properties": {}
+        },
+        {
+            "name": "Bootloaded_toolchain",
+            "type": "toolchain",
+            "provider": "microchip.toolchains:xc8@2.46",
+            "properties": {
+                "compiler.isolate-each-function": true,
+                "compiler.optimization-level": "-O1",
+                "compiler.place-data-into-section": true,
+                "linker.heap-size": "0",
+                "linker.remove-unused-sections": true,
+                "compiler++.isolate-each-function": true,
+                "compiler++.optimization-level": "-O1",
+                "HI-TECH-COMP.optimization-level": "-O2",
+                "HI-TECH-LINK.additional-options-code-offset": "0x1000",
+                "HI-TECH-LINK.code-model-rom": "default,-000-FFF",
+                "HI-TECH-COMP.what-to-do": "require"
+            }
+        },
+        {
+            "name": "default-XC8",
+            "type": "toolchain",
+            "provider": "microchip.toolchains:xc8@2.46",
+            "properties": {
+                "compiler.isolate-each-function": true,
+                "compiler.optimization-level": "-O1",
+                "compiler.place-data-into-section": true,
+                "linker.heap-size": "0",
+                "linker.remove-unused-sections": true,
+                "compiler++.isolate-each-function": true,
+                "compiler++.optimization-level": "-O1",
+                "HI-TECH-COMP.optimization-level": "-O2"
+            }
+        },
+        {
+            "name": "Bootloaded_tool",
+            "type": "tool",
+            "properties": {}
+        },
+        {
+            "name": "default-tool-base",
+            "type": "tool",
+            "properties": {}
+        }
+    ],
+    "fileSets": [
+        {
+            "name": "default",
+            "files": [
+                {
+                    "include": "**/*",
+                    "exclude": "**/@(build|_build|out|cmake|.vscode)/**/*"
+                },
+                "My_MCC_Config/mcc/mcc_generated_files/system/clock.h",
+                "My_MCC_Config/mcc/mcc_generated_files/system/src/clock.c",
+                "My_MCC_Config/mcc/mcc_generated_files/system/interrupt.h",
+                "My_MCC_Config/mcc/mcc_generated_files/system/src/interrupt.c",
+                "My_MCC_Config/mcc/mcc_generated_files/system/system.h",
+                "My_MCC_Config/mcc/mcc_generated_files/system/src/system.c",
+                "My_MCC_Config/mcc/mcc_generated_files/system/src/config_bits.c",
+                "My_MCC_Config/mcc/mcc_generated_files/system/config_bits.h",
+                "My_MCC_Config/mcc/main.c",
+                "My_MCC_Config/mcc/mcc_generated_files/system/src/pins.c",
+                "My_MCC_Config/mcc/mcc_generated_files/system/pins.h",
+                "My_MCC_Config/mcc/mcc_generated_files/fvr/fvr.h",
+                "My_MCC_Config/mcc/mcc_generated_files/fvr/src/fvr.c",
+                "My_MCC_Config/mcc/mcc_generated_files/adc/adc_types.h",
+                "My_MCC_Config/mcc/mcc_generated_files/adc/adc.h",
+                "My_MCC_Config/mcc/mcc_generated_files/adc/src/adc.c",
+                "My_MCC_Config/mcc/mcc_generated_files/uart/src/eusart1.c",
+                "My_MCC_Config/mcc/mcc_generated_files/uart/uart_types.h",
+                "My_MCC_Config/mcc/mcc_generated_files/uart/uart_drv_interface.h",
+                "My_MCC_Config/mcc/mcc_generated_files/uart/eusart1.h",
+                "My_MCC_Config/mcc/mcc_generated_files/timer/src/tmr0.c",
+                "My_MCC_Config/mcc/mcc_generated_files/timer/tmr0.h",
+                "My_MCC_Config/mcc/mcc_generated_files/timer/tmr0_deprecated.h",
+                "My_MCC_Config/mcc/run_update.sh",
+                "My_MCC_Config/mcc/postBuild.bat",
+                "My_MCC_Config/mcc/run_update.bat",
+                "My_MCC_Config/mcc/postBuild.sh",
+                "My_MCC_Config/mcc/footer_certificate.c",
+                "My_MCC_Config/mcc/bootloader_configuration_copy.toml"
+            ]
+        },
+        {
+            "name": "Bootloaded_files",
+            "files": [
+                {
+                    "include": "**/*",
+                    "exclude": "**/@(build|_build|out|cmake|.vscode)/**/*"
+                },
+                "My_MCC_Config/mcc/mcc_generated_files/system/clock.h",
+                "My_MCC_Config/mcc/mcc_generated_files/system/src/clock.c",
+                "My_MCC_Config/mcc/mcc_generated_files/system/interrupt.h",
+                "My_MCC_Config/mcc/mcc_generated_files/system/src/interrupt.c",
+                "My_MCC_Config/mcc/mcc_generated_files/system/system.h",
+                "My_MCC_Config/mcc/mcc_generated_files/system/src/system.c",
+                "My_MCC_Config/mcc/mcc_generated_files/system/src/config_bits.c",
+                "My_MCC_Config/mcc/mcc_generated_files/system/config_bits.h",
+                "My_MCC_Config/mcc/main.c",
+                "My_MCC_Config/mcc/mcc_generated_files/system/src/pins.c",
+                "My_MCC_Config/mcc/mcc_generated_files/system/pins.h",
+                "My_MCC_Config/mcc/mcc_generated_files/fvr/fvr.h",
+                "My_MCC_Config/mcc/mcc_generated_files/fvr/src/fvr.c",
+                "My_MCC_Config/mcc/mcc_generated_files/adc/adc_types.h",
+                "My_MCC_Config/mcc/mcc_generated_files/adc/adc.h",
+                "My_MCC_Config/mcc/mcc_generated_files/adc/src/adc.c",
+                "My_MCC_Config/mcc/mcc_generated_files/uart/src/eusart1.c",
+                "My_MCC_Config/mcc/mcc_generated_files/uart/uart_types.h",
+                "My_MCC_Config/mcc/mcc_generated_files/uart/uart_drv_interface.h",
+                "My_MCC_Config/mcc/mcc_generated_files/uart/eusart1.h",
+                "My_MCC_Config/mcc/mcc_generated_files/timer/src/tmr0.c",
+                "My_MCC_Config/mcc/mcc_generated_files/timer/tmr0.h",
+                "My_MCC_Config/mcc/mcc_generated_files/timer/tmr0_deprecated.h"
+            ]
+        }
+    ]
+}
