@@ -13,6 +13,7 @@ extern "C" {
 #endif
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #define LED_PERIOD 10
 
@@ -43,30 +44,18 @@ typedef enum {
     COLOR_COUNT  // This represents the number of colors
 } ColorName;
 
-// Define a table of 16 colors (RGB values)
-const RGBColor colorTable[COLOR_COUNT] = {
-    {255, 0, 0},    // Red
-    {0, 255, 0},    // Green
-    {0, 0, 255},    // Blue
-    {255, 255, 0},  // Yellow
-    {255, 0, 255},  // Magenta
-    {0, 255, 255},  // Cyan
-    {255, 255, 255},// White
-    {128, 0, 0},    // Maroon
-    {0, 128, 0},    // Dark Green
-    {0, 0, 128},    // Navy
-    {128, 128, 0},  // Olive
-    {128, 0, 128},  // Purple
-    {0, 128, 128},  // Teal
-    {192, 192, 192},// Silver
-    {128, 128, 128},// Gray
-    {0, 0, 0}       // Black
-};
-
-// Declare public functions for the NeoPixel control
+/* Declare public functions for the NeoPixel control */
 void neopixel_setcolor(uint8_t led, ColorName colorname, uint8_t dutycycle);
 
 void neopixel_runner(void);
+
+/* Suspend the state-driven LED updates in main.c for `ticks` TMR0 ticks
+ * (~100 ms each) so a manually-set color stays visible. Called by the
+ * SET_NEOPIXEL command handler and on startup. The counter is owned
+ * here so commands.c can drive it without reaching into main.c. */
+void neopixel_overrule(uint16_t ticks);
+void neopixel_overrule_tick_isr(void);
+bool neopixel_is_overruled(void);
 
 #ifdef	__cplusplus
 }

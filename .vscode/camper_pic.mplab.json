@@ -26,7 +26,7 @@
             "imageType": "application",
             "imagePath": "./out/camper_pic/Bootloaded.elf",
             "toolProperties": "Bootloaded_tool",
-            "tool": "Simulator",
+            "tool": "Snap",
             "packs": [
                 {
                     "name": "PIC16F1xxxx_DFP",
@@ -83,18 +83,27 @@
                 "linker.remove-unused-sections": true,
                 "compiler++.isolate-each-function": true,
                 "compiler++.optimization-level": "-O1",
-                "HI-TECH-COMP.optimization-level": "-O2"
+                "HI-TECH-COMP.optimization-level": "-O0"
             }
         },
         {
             "name": "Bootloaded_tool",
             "type": "tool",
-            "properties": {}
+            "properties": {
+                "memories.configurationmemory": false,
+                "memories.eeprom": false,
+                "memories.id": false,
+                "programoptions.preserveprogram.ranges": "0-fff"
+            }
         },
         {
             "name": "default-tool-base",
             "type": "tool",
-            "properties": {}
+            "properties": {
+                "memories.configurationmemory": false,
+                "memories.eeprom": false,
+                "memories.id": false
+            }
         }
     ],
     "fileSets": [

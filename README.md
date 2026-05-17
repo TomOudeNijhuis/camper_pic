@@ -28,3 +28,17 @@ To open the serial console on Linux:
 ```sh
 picocom -b 115200 /dev/ttyS0
 ```
+
+## Update using bootloader
+
+```sh
+# Query the connected bootloader client
+pymdfu client-info --tool serial --port /dev/ttyS0 --baudrate 115200
+
+# Push a new application image
+pymdfu update --tool serial --image camper_pic_application.img --port /dev/ttyS0 --baudrate 115200
+```
+
+```sh
+sudo systemctl stop camper_api.service
+```

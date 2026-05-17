@@ -16,8 +16,14 @@ foreach(source_file ${camper_pic_Bootloaded_Bootloaded_toolchain_FILE_TYPE_assem
 endforeach()
 
 set(camper_pic_Bootloaded_Bootloaded_toolchain_FILE_TYPE_compile
+    "${CMAKE_CURRENT_SOURCE_DIR}/../../../My_MCC_Config/mcc/drivers/src/adc_sampler.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../../../My_MCC_Config/mcc/drivers/src/commands.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../../../My_MCC_Config/mcc/drivers/src/crc16.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../../../My_MCC_Config/mcc/drivers/src/errors.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/../../../My_MCC_Config/mcc/drivers/src/neopixels.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/../../../My_MCC_Config/mcc/drivers/src/power.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../../../My_MCC_Config/mcc/drivers/src/protocol.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../../../My_MCC_Config/mcc/drivers/src/telemetry.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/../../../My_MCC_Config/mcc/footer_certificate.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/../../../My_MCC_Config/mcc/main.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/../../../My_MCC_Config/mcc/mcc_generated_files/adc/src/adc.c"

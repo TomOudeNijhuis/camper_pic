@@ -1,97 +1,60 @@
- /*
- * MAIN Generated Driver File
- * 
- * @file main.c
- * 
- * @defgroup main MAIN
- * 
- * @brief This is the generated driver implementation file for the MAIN driver.
- *
- * @version MAIN Driver Version 1.0.2
- *
- * @version Package Version: 3.1.2
-*/
-
 /*
-? [2026] Microchip Technology Inc. and its subsidiaries.
+ * Camper PIC application entry point.
+ *
+ * Layered firmware:
+ *   - EUSART1 (MCC, interrupt-driven 64-byte FIFOs) feeds protocol.c
+ *   - protocol.c assembles frames from the RX-complete ISR
+ *   - commands.c dispatches opcodes from the main loop
+ *   - adc_sampler.c walks ADC channels via the ADC done ISR
+ *   - telemetry.c streams snapshots fast (1 s) when subscribed, slow
+ *     (60 s) when idle; emits async OP_EVENT on error rising edges
+ *   - errors.c maintains a sticky 16-bit error word with hysteresis
+ *
+ * Timer_Callback runs in ISR context and stays short: ticks the
+ * heartbeat/scheduler counters, kicks the ADC sampler periodically,
+ * and runs the neopixel blink runner. No ADC reads, no waiting.
+ */
 
-    Subject to your compliance with these terms, you may use Microchip 
-    software and any derivatives exclusively with Microchip products. 
-    You are responsible for complying with 3rd party license terms  
-    applicable to your use of 3rd party software (including open source  
-    software) that may accompany Microchip software. SOFTWARE IS ?AS IS.? 
-    NO WARRANTIES, WHETHER EXPRESS, IMPLIED OR STATUTORY, APPLY TO THIS 
-    SOFTWARE, INCLUDING ANY IMPLIED WARRANTIES OF NON-INFRINGEMENT,  
-    MERCHANTABILITY, OR FITNESS FOR A PARTICULAR PURPOSE. IN NO EVENT 
-    WILL MICROCHIP BE LIABLE FOR ANY INDIRECT, SPECIAL, PUNITIVE, 
-    INCIDENTAL OR CONSEQUENTIAL LOSS, DAMAGE, COST OR EXPENSE OF ANY 
-    KIND WHATSOEVER RELATED TO THE SOFTWARE, HOWEVER CAUSED, EVEN IF 
-    MICROCHIP HAS BEEN ADVISED OF THE POSSIBILITY OR THE DAMAGES ARE 
-    FORESEEABLE. TO THE FULLEST EXTENT ALLOWED BY LAW, MICROCHIP?S 
-    TOTAL LIABILITY ON ALL CLAIMS RELATED TO THE SOFTWARE WILL NOT 
-    EXCEED AMOUNT OF FEES, IF ANY, YOU PAID DIRECTLY TO MICROCHIP FOR 
-    THIS SOFTWARE.
-*/
-#include <string.h>
-#include <stdio.h>
+#include <xc.h>
+#include <stdbool.h>
 #include "mcc_generated_files/system/system.h"
 #include "drivers/neopixels.h"
 #include "drivers/power.h"
+#include "drivers/protocol.h"
+#include "drivers/commands.h"
+#include "drivers/adc_sampler.h"
+#include "drivers/telemetry.h"
+#include "drivers/errors.h"
 
-#define BUFFER_SIZE 64
-char rx_buffer[BUFFER_SIZE];
-uint8_t buffer_index = 0;
+#define STARTUP_OVERRULE_TIME   100U
+#define ADC_SAMPLE_EVERY_TICKS    5U   /* TMR0 = ~100 ms; sample every ~500 ms */
 
-#define MAX_COMMAND_LENGTH 16
-#define OVERRULE_TIME 1800
-#define STARTUP_OVERRULE_TIME 100
+static volatile uint8_t  adc_sample_divider;
+static volatile bool     neopixel_tick_pending;
 
-#define BL_ENTRY_EEPROM_ADDR 0xF000U
-#define BL_ENTRY_MARKER      0xA5U
+static void Timer_Callback(void) {
+    neopixel_overrule_tick_isr();
+    telemetry_tick_isr();
+    errors_tick_isr();
 
-// Function to handle received commands
-void handle_command(char *command);
-
-// Set the bootloader entry marker in EEPROM and reset into the bootloader.
-static void enterBootloader(void) {
-    INTCONbits.GIE = 0;
-
-    NVMCON1bits.NVMREGS = 1;
-    NVMADRH = (uint8_t)(BL_ENTRY_EEPROM_ADDR >> 8);
-    NVMADRL = (uint8_t)(BL_ENTRY_EEPROM_ADDR & 0xFFU);
-    NVMDATL = BL_ENTRY_MARKER;
-    NVMCON1bits.WREN = 1;
-    NVMCON2 = 0x55;
-    NVMCON2 = 0xAA;
-    NVMCON1bits.WR = 1;
-    while (NVMCON1bits.WR) { ; }
-    NVMCON1bits.WREN = 0;
-
-    __asm("reset");
-}
-
-/*
-    Main application
-*/
-uint16_t neopixel_overruled_counter = 0;
-
-static void Timer_Callback(void)
-{
-    powerRunner();
-    neopixel_runner();
-
-    if (neopixel_overruled_counter > 0) {
-        neopixel_overruled_counter --;
+    if (++adc_sample_divider >= ADC_SAMPLE_EVERY_TICKS) {
+        adc_sample_divider = 0;
+        adc_sampler_start_cycle();
     }
+
+    /* Run the bit-banged WS2812 protocol from main, not from the ISR.
+     * Each invocation takes ~180 us with GIE=0; doing it in main lets
+     * the EUSART RX ISR preempt and keeps the 2-byte hardware FIFO
+     * from overflowing during a UART burst. */
+    neopixel_tick_pending = true;
 }
 
-int main(void)
-{
-    uint8_t state1;
-    uint8_t state2;
-    uint8_t switch1_prev;
-    uint8_t switch2_prev;
-    
+int main(void) {
+    uint8_t switch1_prev = 1;
+    uint8_t switch2_prev = 1;
+    protocol_frame_t frame;
+    uint8_t nack_reason;
+
     SYSTEM_Initialize();
     powerInitialize();
 
@@ -101,241 +64,68 @@ int main(void)
     INT_OUT_SetDigitalOutput();
 
     EUSART1_Enable();
+
+    adc_sampler_init();
+    protocol_init();
+    errors_init();
+    telemetry_init();
+
     TMR0_PeriodMatchCallbackRegister(Timer_Callback);
-    
-    INTERRUPT_GlobalInterruptEnable(); 
- 	INTERRUPT_PeripheralInterruptEnable(); 
-   
-    neopixel_overruled_counter = STARTUP_OVERRULE_TIME;
+
+    INTERRUPT_GlobalInterruptEnable();
+    INTERRUPT_PeripheralInterruptEnable();
+
+    neopixel_overrule(STARTUP_OVERRULE_TIME);
     neopixel_setcolor(1, TEAL, 5);
     neopixel_setcolor(2, TEAL, 5);
-    
+
     INT_OUT_LAT = 1;
-    printf("Camper Interface Running\r\n");
     __delay_ms(25);
-
     INT_OUT_LAT = 0;
-
     __delay_ms(25);
-    
-    while(1)
-    {
-        if (EUSART1_IsRxReady()) {
-            char received_char = EUSART1_Read();  // Read a character from EUSART buffer
 
-            if (received_char == '\r') {
-                putch('\r');
-                putch('\n');
-                rx_buffer[buffer_index] = '\0';  // Null-terminate the string
-                handle_command(rx_buffer);       // Process the received command
-                buffer_index = 0;                // Reset buffer index
-            } else if (received_char == '\b') {
-                if (buffer_index > 0) {
-                    buffer_index--;
-                    rx_buffer[buffer_index] = '\0';
-                            
-                    putch('\b');
-                    putch(' ');
-                    putch('\b');
-                }
-            } else {
-                // Store the character in the buffer
-                if (buffer_index < (BUFFER_SIZE - 1)) {
-                    rx_buffer[buffer_index++] = received_char;
-                    putch(received_char);
-                }
-            }
+    while (1) {
+        if (protocol_poll(&frame)) {
+            commands_dispatch(&frame);
         }
-        // read button values
+
+        if (protocol_take_pending_nack(&nack_reason)) {
+            protocol_send_nack(0xFF, nack_reason);
+        }
+
         if (SWITCH1_PORT == 0 && switch1_prev == 1) {
             switch1_prev = 0;
-            
-            state2 = getPumpState();
-            
-            if (state2 == 0) {
-                setPump(1);
-            } else {
-                setPump(0);
-            }
+            setPump(getPumpState() ? 0 : 1);
         } else if (SWITCH1_PORT == 1) {
             switch1_prev = 1;
         }
-        
+
         if (SWITCH2_PORT == 0 && switch2_prev == 1) {
             switch2_prev = 0;
-            
-            state1 = getHouseholdState();
-            
-            if (state1 == OFF) {
+            if (getHouseholdState() == OFF) {
                 setHousehold(1);
+                errors_arm_household_switch();
             } else {
                 setHousehold(0);
+                errors_disarm_household_switch();
             }
         } else if (SWITCH2_PORT == 1) {
             switch2_prev = 1;
         }
-        
-        // Update neopixels
-        if (neopixel_overruled_counter == 0) {
-            state1 = (uint8_t)getHouseholdState();
 
-            if (state1 == OFF) {
-                neopixel_setcolor(1, BLACK, 0);
-            } else if (state1 == PENDING) {
-                neopixel_setcolor(1, YELLOW, 0);
-            } else {
-                neopixel_setcolor(1, GREEN, 0);
-            }
+        (void)adc_sampler_consume();
+        errors_run_detectors();
 
-            state2 = (uint8_t)getPumpState();
+        if (neopixel_tick_pending) {
+            neopixel_tick_pending = false;
+            neopixel_runner();
+        }
 
-            if (state2 == 0) {
-                neopixel_setcolor(2, BLACK, 0);
-            } else {
-                neopixel_setcolor(2, GREEN, 0);
-            }        
+        if (!neopixel_is_overruled()) {
+            neopixel_setcolor(1, (getHouseholdState() == ON) ? GREEN : BLACK, 0);
+            neopixel_setcolor(2, getPumpState() ? GREEN : BLACK, 0);
         }
-    }    
-}
- 
-// Function to handle received commands
-void handle_command(char *command_str) {
-    char command[MAX_COMMAND_LENGTH] = {0};
-    char param_str[MAX_COMMAND_LENGTH] = {0};
-    char param2_str[MAX_COMMAND_LENGTH] = {0};
-    
-    uint8_t param_value = 0;
-    uint8_t i;
-    uint16_t temp;
-      
-    sscanf(command_str, "%s %s %s", command, param_str, param2_str);
-    
-    // Handle the command
-    if (strcmp(command, "NEOPIXEL1") == 0) {
-        if (strlen(param2_str) > 0)
-            param_value = (uint8_t)atoi(param2_str);
-        else
-            param_value = 0;
-        
-        if (strcmp(param_str, "cyan") == 0) {
-            neopixel_setcolor(1, CYAN, param_value);
-            neopixel_overruled_counter = OVERRULE_TIME;
-            printf("NEOPIXEL1 state=%s\r\n", "cyan");
-        } else if (strcmp(param_str, "olive") == 0) {
-            neopixel_setcolor(1, OLIVE, param_value);
-            neopixel_overruled_counter = OVERRULE_TIME;
-            printf("NEOPIXEL1 state=%s\r\n", "olive");
-        } else if (strcmp(param_str, "silver") == 0) {
-            neopixel_setcolor(1, SILVER, param_value);
-            neopixel_overruled_counter = OVERRULE_TIME;
-            printf("NEOPIXEL1 state=%s\r\n", "silver");
-        } else if (strcmp(param_str, "black") == 0) {
-            neopixel_setcolor(1, BLACK, param_value);
-            neopixel_overruled_counter = OVERRULE_TIME;
-            printf("NEOPIXEL1 state=%s\r\n", "black");
-        } else {
-            printf("Unknown parameter: %s\r\n", param_str);
-            printf("Options are NEOPIXEL1 <color: cyan, olive, silver, black> <dutycycle: <0-10>\r\n");
-        }
-    } else if (strcmp(command, "NEOPIXEL2") == 0) {
-        if (strlen(param2_str) > 0)
-            param_value = (uint8_t)atoi(param2_str);
-        else
-            param_value = 0;
 
-        if (strcmp(param_str, "cyan") == 0) {
-            neopixel_setcolor(2, CYAN, param_value);
-            neopixel_overruled_counter = OVERRULE_TIME;
-            printf("NEOPIXEL2 state=%s\r\n", "cyan");
-        } else if (strcmp(param_str, "olive") == 0) {
-            neopixel_setcolor(2, OLIVE, param_value);
-            printf("NEOPIXEL2 state=%s\r\n", "olive");
-            neopixel_overruled_counter = OVERRULE_TIME;
-        } else if (strcmp(param_str, "silver") == 0) {
-            neopixel_setcolor(2, SILVER, param_value);
-            neopixel_overruled_counter = OVERRULE_TIME;
-            printf("NEOPIXEL2 state=%s\r\n", "silver");
-        } else if (strcmp(param_str, "black") == 0) {
-            neopixel_setcolor(2, BLACK, param_value);
-            neopixel_overruled_counter = OVERRULE_TIME;
-            printf("NEOPIXEL2 state=%s\r\n", "black");
-        } else {
-            printf("Unknown parameter: %s\r\n", param_str);
-            printf("Use NEOPIXEL2 <color: cyan, olive, silver, black> <dutycycle: <0-10>\r\n");
-        }
-    } else if (strcmp(command, "HOUSEHOLD") == 0) {
-        if (strcmp(param_str, "?") == 0) {
-            const char* status = getHouseHoldStateStr();
-            printf("HOUSEHOLD state=%s\r\n", status);
-        } else if ((strcmp(param_str, "0") == 0) || (strcmp(param_str, "OFF") == 0)) {
-            setHousehold(0);
-            __delay_ms(100);
-            const char* status = getHouseHoldStateStr();
-            printf("HOUSEHOLD state=%s\r\n", status);
-        } else if ((strcmp(param_str, "1") == 0) || (strcmp(param_str, "ON") == 0)) {
-            setHousehold(1);
-            __delay_ms(100);
-            const char* status = getHouseHoldStateStr();
-            printf("HOUSEHOLD state=%s\r\n", status);    
-        } else {
-            printf("Unknown parameter: %s\r\n", param_str);
-            printf("Use HOUSEHOLD <state: ?, 0, 1, OFF, ON>\r\n");
-        }
-    } else if (strcmp(command, "PUMP") == 0) {
-        if (strcmp(param_str, "?") == 0) {
-            const char* status = getPumpStateStr();
-            printf("PUMP state=%s\r\n", status);
-        } else if ((strcmp(param_str, "0") == 0) || (strcmp(param_str, "OFF") == 0)) {
-            setPump(0);
-            __delay_ms(100);
-            const char* status = getPumpStateStr();
-            printf("PUMP state=%s\r\n", status);      
-        }  else if ((strcmp(param_str, "1") == 0) || (strcmp(param_str, "ON") == 0)) {
-            setPump(1);
-            __delay_ms(100);
-            const char* status = getPumpStateStr();
-            printf("PUMP state=%s\r\n", status);      
-        } else {
-            printf("Unknown parameter: %s\r\n", param_str);
-            printf("Use PUMP <state: ?, 0, 1, OFF, ON>\r\n");
-        }
-    } else if (strcmp(command, "VOLTAGE") == 0) {
-        if (strcmp(param_str, "household") == 0) {
-            temp = getVoltage(V_HOUSEHOLD);
-            printf("VOLTAGE household=%d\r\n", temp);      
-        } else if (strcmp(param_str, "mains") == 0) {
-            temp = getVoltage(V_MAINS);
-            printf("VOLTAGE mains=%d\r\n", temp);      
-        } else if (strcmp(param_str, "starter") == 0) {
-            temp = getVoltage(V_STARTER);
-            printf("VOLTAGE starter=%d\r\n", temp);      
-        } else {
-            printf("Unknown parameter: %s\r\n", param_str);
-            printf("Use VOLTAGE <channel: household, mains, starter>\r\n");
-        }
-    } else if (strcmp(command, "WATER") == 0) {
-        if (strcmp(param_str, "?") == 0) {
-            i = getWater();
-            printf("WATER value=%d\r\n", i);
-        } else {
-            printf("Unknown parameter: %s\r\n", param_str);
-            printf("Use WATER <state: ?>\r\n");
-        }
-    } else if (strcmp(command, "WASTE") == 0) {
-        if (strcmp(param_str, "?") == 0) {
-            i = getWaste();
-            printf("WASTE value=%d\r\n", i);
-        } else {
-            printf("Unknown parameter: %s\r\n", param_str);
-            printf("Use WASTE <state: ?>\r\n");
-        }
-    } else if (strcmp(command, "BOOTLOADER") == 0) {
-        printf("BOOTLOADER entering...\r\n");
-        __delay_ms(50);
-        enterBootloader();
-    } else {
-        // Handle unknown command
-        printf("Unknown command: %s\r\n", command);
-        printf("Implemented commands are NEOPIXEL1, NEOPIXEL2, HOUSEHOLD, PUMP, VOLTAGE, WATER, WASTE, BOOTLOADER.\r\n");
+        telemetry_run();
     }
 }

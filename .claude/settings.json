@@ -25,7 +25,27 @@
       "Read(//opt/microchip/xc8/**)",
       "Bash(find /home/oudenijhuis/.mchp_packs/Microchip/PIC16F1xxxx_DFP/1.31.465/xc8/pic/include -name \"*18056*\" -o -name \"*F18056*\" 2>/dev/null | head -5)",
       "Read(//home/oudenijhuis/.mchp_packs/Microchip/PIC16F1xxxx_DFP/1.31.465/xc8/pic/include/**)",
-      "Bash(awk '/IO_PIN_ENTRY/' /home/oudenijhuis/develop_tom/camper_pic_loader/My_MCC_Config/mcc/mcc_generated_files/bootloader/example/bl_example.c /home/oudenijhuis/develop_tom/camper_pic_loader/My_MCC_Config/mcc/mcc_generated_files/bootloader/example/bl_example.h)"
+      "Bash(awk '/IO_PIN_ENTRY/' /home/oudenijhuis/develop_tom/camper_pic_loader/My_MCC_Config/mcc/mcc_generated_files/bootloader/example/bl_example.c /home/oudenijhuis/develop_tom/camper_pic_loader/My_MCC_Config/mcc/mcc_generated_files/bootloader/example/bl_example.h)",
+      "Bash(grep -E \"\\\\.\\(c|h\\)$\")",
+      "Bash(which xc8-cc *)",
+      "Read(//opt/microchip/**)",
+      "Bash(cmake --preset camper_pic_Bootloaded_conf -S cmake/camper_pic/Bootloaded)",
+      "Bash(cmake --build _build/camper_pic/Bootloaded)",
+      "Bash(awk '/RxComplete/ {print FILENAME\":\"NR\": \"$0}' /home/oudenijhuis/develop_tom/camper_pic/My_MCC_Config/mcc/mcc_generated_files/uart/eusart1.h /home/oudenijhuis/develop_tom/camper_pic/My_MCC_Config/mcc/mcc_generated_files/uart/src/eusart1.c)",
+      "Bash(awk '/EUSART1_Enable|EUSART1_Initialize/ {found=1; print FILENAME\":\"NR\": \"$0; next} found && /^}/ {print FILENAME\":\"NR\": \"$0; found=0; next} found {print FILENAME\":\"NR\": \"$0}' /home/oudenijhuis/develop_tom/camper_pic/My_MCC_Config/mcc/mcc_generated_files/uart/src/eusart1.c)",
+      "Bash(awk '/UART_RX|RC3/ {print FILENAME\":\"NR\": \"$0}' /home/oudenijhuis/develop_tom/camper_pic/My_MCC_Config/mcc/main.c /home/oudenijhuis/develop_tom/camper_pic/My_MCC_Config/mcc/drivers/src/*.c)",
+      "Bash(awk '/RX|UART_RX|RC3|RXPPS/ {print FILENAME\":\"NR\": \"$0}' /home/oudenijhuis/develop_tom/camper_pic/My_MCC_Config/mcc/mcc_generated_files/system/src/pins.c)",
+      "Bash(awk '/RC1IE|PIE3/ {print FILENAME\":\"NR\": \"$0}' /home/oudenijhuis/develop_tom/camper_pic/My_MCC_Config/mcc/drivers/src/*.c /home/oudenijhuis/develop_tom/camper_pic/My_MCC_Config/mcc/main.c)",
+      "Bash(cmake --build _build/camper_pic/default)",
+      "Bash(awk '/errors_last_reported/ {print FILENAME\":\"NR\": \"$0}' /home/oudenijhuis/develop_tom/camper_pic/My_MCC_Config/mcc/drivers/src/errors.c)",
+      "Bash(awk '/^void ADC_ISR/,/^}/' /home/oudenijhuis/develop_tom/camper_pic/My_MCC_Config/mcc/mcc_generated_files/adc/src/adc.c)",
+      "Bash(awk '/commands_dispatch/ {print FILENAME\":\"NR\": \"$0}' /home/oudenijhuis/develop_tom/camper_pic/My_MCC_Config/mcc/main.c /home/oudenijhuis/develop_tom/camper_pic/My_MCC_Config/mcc/drivers/src/*.c)",
+      "Bash(cmake --build _build/camper_pic/default --clean-first)",
+      "Bash(awk '/^-A/ {print FILENAME\":\"NR\": \"$0; exit}' _build/camper_pic/Bootloaded/mem.map)",
+      "Bash(grep -iE \"_INTERRUPT_InterruptManager\\\\b|^_main\\\\b|main$|app_reset\" /home/oudenijhuis/develop_tom/camper_pic/out/camper_pic/Bootloaded.sym)",
+      "Bash(awk '/cmd_set_neopixel/,/^}/' /home/oudenijhuis/develop_tom/camper_pic/My_MCC_Config/mcc/drivers/src/commands.c)",
+      "Bash(awk '/SWITCH1\\\\|SWITCH2|SetDigital/ {print FILENAME\":\"NR\": \"$0}' /home/oudenijhuis/develop_tom/camper_pic/My_MCC_Config/mcc/main.c)",
+      "Bash(awk '/WPU|nWPUEN|OPTION_REG/ {print FILENAME\":\"NR\": \"$0}' /home/oudenijhuis/develop_tom/camper_pic/My_MCC_Config/mcc/mcc_generated_files/system/src/pins.c /home/oudenijhuis/develop_tom/camper_pic/My_MCC_Config/mcc/mcc_generated_files/system/src/clock.c)"
     ],
     "additionalDirectories": [
       "/tmp"
