@@ -136,17 +136,6 @@ static void flush_error_event(void) {
     }
 }
 
-static void push_debug_event(void) {
-    uint16_t bytes, frames, crc_fails;
-    uint8_t  buf[7];
-    protocol_get_debug_counts(&bytes, &frames, &crc_fails);
-    buf[0] = EVENT_DEBUG;
-    put_u16_le(&buf[1], bytes);
-    put_u16_le(&buf[3], frames);
-    put_u16_le(&buf[5], crc_fails);
-    (void)protocol_send(OP_EVENT, buf, 7, false);
-}
-
 void telemetry_run(void) {
     bool expired;
     INTCONbits.GIE = 0;
@@ -191,13 +180,14 @@ void telemetry_run(void) {
             payload[8] |= STATE_FLAG_VALUES_CHANGED;
         }
 
-        push_debug_event();
         if (protocol_send(OP_TELEMETRY_PUSH, payload, TELEMETRY_PAYLOAD_LEN, false)) {
-            /* Store *what was sent*, including the changed bit, so the
-             * next comparison reflects what the host last saw. */
+            /* Stash WITHOUT the VALUES_CHANGED bit so the next comparison
+             * detects real field changes rather than seeing this self-set
+             * bit toggle on every push. */
             for (i = 0; i < TELEMETRY_PAYLOAD_LEN; i++) {
                 last_pushed_payload[i] = payload[i];
             }
+            last_pushed_payload[8] &= (uint8_t)~STATE_FLAG_VALUES_CHANGED;
             last_payload_valid = true;
         }
 

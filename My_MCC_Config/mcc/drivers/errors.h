@@ -34,6 +34,12 @@ extern "C" {
 
 void errors_init(void);
 
+/* Snapshot of PCON0 taken at the top of errors_init(), before any software
+ * touches the reset-cause flags. Bit layout: 7=STKOVF, 6=STKUNF, 4=nRWDT,
+ * 3=nRMCLR, 2=nRI, 1=nPOR, 0=nBOR. Active-low bits read 0 when that reset
+ * occurred. */
+uint8_t errors_get_boot_pcon0(void);
+
 void errors_set(uint16_t mask);
 void errors_clear(uint16_t mask);
 uint16_t errors_get(void);

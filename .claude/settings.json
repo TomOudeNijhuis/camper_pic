@@ -46,7 +46,23 @@
       "Bash(awk '/cmd_set_neopixel/,/^}/' /home/oudenijhuis/develop_tom/camper_pic/My_MCC_Config/mcc/drivers/src/commands.c)",
       "Bash(awk '/SWITCH1\\\\|SWITCH2|SetDigital/ {print FILENAME\":\"NR\": \"$0}' /home/oudenijhuis/develop_tom/camper_pic/My_MCC_Config/mcc/main.c)",
       "Bash(awk '/WPU|nWPUEN|OPTION_REG/ {print FILENAME\":\"NR\": \"$0}' /home/oudenijhuis/develop_tom/camper_pic/My_MCC_Config/mcc/mcc_generated_files/system/src/pins.c /home/oudenijhuis/develop_tom/camper_pic/My_MCC_Config/mcc/mcc_generated_files/system/src/clock.c)",
-      "Bash(awk '/errors_run_detectors\\\\b/ {print FILENAME\":\"NR\": \"$0}' /home/oudenijhuis/develop_tom/camper_pic/My_MCC_Config/mcc/main.c /home/oudenijhuis/develop_tom/camper_pic/My_MCC_Config/mcc/drivers/src/*.c)"
+      "Bash(awk '/errors_run_detectors\\\\b/ {print FILENAME\":\"NR\": \"$0}' /home/oudenijhuis/develop_tom/camper_pic/My_MCC_Config/mcc/main.c /home/oudenijhuis/develop_tom/camper_pic/My_MCC_Config/mcc/drivers/src/*.c)",
+      "Bash(python3 -c \"import ast; ast.parse\\(open\\('/home/oudenijhuis/develop_tom/camper_pic/tools/camper_protocol.py'\\).read\\(\\)\\); print\\('OK'\\)\")",
+      "Bash(grep -rn \"\\(\\\\*[a-zA-Z_].*\\)\\(.*\\)\\\\|CallbackRegister\\\\|Callback;\\\\s*$\" /home/oudenijhuis/develop_tom/camper_pic/My_MCC_Config/mcc/drivers/ /home/oudenijhuis/develop_tom/camper_pic/My_MCC_Config/mcc/main.c)",
+      "Bash(awk '/EUSART1_Read\\\\b|EUSART1_IsRxReady\\\\b|EUSART1_RxCompleteCallbackRegister/{print NR\": \"$0}' /home/oudenijhuis/develop_tom/camper_pic/My_MCC_Config/mcc/mcc_generated_files/uart/src/eusart1.c)",
+      "Bash(/bin/grep -n \"Read\\\\|IsRxReady\" /home/oudenijhuis/develop_tom/camper_pic/My_MCC_Config/mcc/mcc_generated_files/uart/eusart1.h)",
+      "Bash(/bin/grep -n \"EUSART1_Read\\\\|EUSART1_IsRxReady\" /home/oudenijhuis/develop_tom/camper_pic/My_MCC_Config/mcc/mcc_generated_files/uart/src/eusart1.c)",
+      "Bash(python3 tools/camper_protocol.py)",
+      "Bash(python3 tools/camper_protocol.py stream --help)",
+      "Bash(/bin/grep -n \"_protocol_on_rx_byte\" /home/oudenijhuis/develop_tom/camper_pic/_build/camper_pic/Bootloaded/mem.map)",
+      "Bash(/bin/grep -n \"_protocol_on_rx_byte\\\\|text103\" /home/oudenijhuis/develop_tom/camper_pic/_build/camper_pic/Bootloaded/mem.map)",
+      "Bash(/bin/grep -n \"^                text\" /home/oudenijhuis/develop_tom/camper_pic/_build/camper_pic/Bootloaded/mem.map)",
+      "Bash(awk '$3 >= \"1000\" && $3 < \"1800\"')",
+      "Bash(/bin/grep \"^                text\" /home/oudenijhuis/develop_tom/camper_pic/_build/camper_pic/Bootloaded/mem.map)",
+      "Bash(/bin/grep -n \"_INTERRUPT_InterruptManager\\\\|_EUSART1_ReceiveISR\\\\|_EUSART1_RxInterruptHandler\" /home/oudenijhuis/develop_tom/camper_pic/_build/camper_pic/Bootloaded/mem.map)",
+      "Bash(/bin/grep \"_protocol_on_rx_byte\\\\s\\\\|_protocol_on_rx_byte$\" /home/oudenijhuis/develop_tom/camper_pic/_build/camper_pic/Bootloaded/mem.map)",
+      "Bash(/bin/grep -n \"_rx_slot\\\\|_rx_payload\\\\b\\\\|_rx_byte_count\\\\|_rx_state\\\\b\\\\|_rx_opcode\\\\b\\\\|_rx_len\\\\b\" /home/oudenijhuis/develop_tom/camper_pic/_build/camper_pic/Bootloaded/mem.map)",
+      "Bash(/bin/grep \"_protocol_on_rx_byte\" /home/oudenijhuis/develop_tom/camper_pic/_build/camper_pic/Bootloaded/mem.map)"
     ],
     "additionalDirectories": [
       "/tmp"

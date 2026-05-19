@@ -68,7 +68,9 @@
                 "HI-TECH-COMP.optimization-level": "-O2",
                 "HI-TECH-LINK.additional-options-code-offset": "0x1000",
                 "HI-TECH-LINK.code-model-rom": "default,-000-FFF",
-                "HI-TECH-COMP.what-to-do": "require"
+                "HI-TECH-COMP.what-to-do": "require",
+                "HI-TECH-LINK.keep-generated-startup.as": true,
+                "HI-TECH-COMP.optimization-assembler-files": true
             }
         },
         {

@@ -245,7 +245,9 @@ See [Error catalogue](#error-catalogue) below.
 Request: payload `[mask_lo, mask_hi]` — bits set in the mask are cleared in the firmware's error word.
 Reply: `OP_ACK`, payload `[0x44, remaining_lo, remaining_hi]` — error word **after** clearing.
 
-To clear all errors, send mask `0xFFFF`. Clearing a bit also resets the "rising edge" snapshot for that bit, so if the underlying condition is still true, the firmware will re-raise it and push a fresh `OP_EVENT`.
+To clear all errors, send mask `0xFFFF`. Clearing a bit also resets the "rising edge" snapshot for that bit, so if the underlying condition becomes true again, the firmware will re-raise it and push a fresh `OP_EVENT`.
+
+**Condition-gated bits.** For errors whose underlying physical condition is currently active, the clear is silently **refused**: `WATER_LOW`, `WASTE_HIGH`, `WASTE_FULL`, `VOLTAGE_HOUSEHOLD_LOW`, `VOLTAGE_STARTER_LOW`, `VOLTAGE_MAINS_LOW`, `ADC_STUCK`. The ACK payload carries the resulting error word so the host can see which bits remained set. Historical/one-shot bits (`HOUSEHOLD_SWITCH_FAILED`, `PROTOCOL_CRC`, `PROTOCOL_OVERRUN`, `BROWN_OUT`) are always clearable. A mask that includes both kinds of bits clears the historical ones and leaves the live ones — no NACK is emitted.
 
 ### 0x80 OP_TELEMETRY_PUSH (async)
 
@@ -289,10 +291,25 @@ Pushed by the firmware on a state transition. Payload is `[kind, ...kind-specifi
 | Kind | Name | Body |
 |---|---|---|
 | 0x01 | ERROR_RAISED | `[mask_lo, mask_hi]` — u16 mask of bits that **newly** became set since the previous push of this event |
+| 0x03 | BOOT_RESET_CAUSE | `[pcon0]` — raw PCON0 byte snapshotted at boot before any software touched it |
 
 Only the *newly raised* bits appear in the mask, not the full current error word. To get the full word after handling the event, call `OP_GET_ERRORS`. Each bit is announced exactly once per rising edge; clearing then re-raising the same condition produces a fresh `ERROR_RAISED` event.
 
 `ERROR_RAISED` is sent **blocking** (firmware will not drop it on TX FIFO pressure) and is independent of the subscribe state — even an idle host gets it immediately, as long as the link is up.
+
+`BOOT_RESET_CAUSE` is sent **once per boot**, blocking, immediately after the UART comes up. The byte's bit layout (PIC16F18045 PCON0):
+
+| Bit | Name | Polarity | Meaning when "this reset happened" |
+|---|---|---|---|
+| 7 | STKOVF | active-high | `1` = hardware stack overflow |
+| 6 | STKUNF | active-high | `1` = hardware stack underflow |
+| 4 | nRWDT  | active-low  | `0` = watchdog reset |
+| 3 | nRMCLR | active-low  | `0` = MCLR pin reset |
+| 2 | nRI    | active-low  | `0` = software `RESET` instruction |
+| 1 | nPOR   | active-low  | `0` = power-on reset |
+| 0 | nBOR   | active-low  | `0` = brown-out reset |
+
+Firmware clears all sticky flags after snapshotting, so each boot's value reflects only the most recent reset cause.
 
 ### 0xF0 OP_ACK
 

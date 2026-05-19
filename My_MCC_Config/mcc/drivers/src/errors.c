@@ -17,6 +17,8 @@
 static volatile uint16_t errors_word;
 static volatile uint16_t errors_last_reported;
 
+static uint8_t boot_pcon0_snapshot;
+
 static uint8_t hyst_household_low;
 static uint8_t hyst_starter_low;
 static uint8_t hyst_mains_low;
@@ -39,6 +41,13 @@ static void errors_set_raw(uint16_t mask) {
 }
 
 void errors_init(void) {
+    /* Snapshot PCON0 before anything else, then re-arm all sticky flags so
+     * the next reset captures fresh info. Active-low bits (nRWDT/nRMCLR/
+     * nRI/nPOR/nBOR) are armed by writing 1; active-high bits (STKOVF/
+     * STKUNF) are armed by writing 0. */
+    boot_pcon0_snapshot = PCON0;
+    PCON0 = 0x3FU;
+
     errors_word = 0;
     errors_last_reported = 0;
 
@@ -52,24 +61,57 @@ void errors_init(void) {
     household_switch_ticks = 0;
     adc_stall_ticks = 0;
 
-    /* Latch brown-out on boot. PCON0 bits are sticky across reset until
-     * explicitly cleared by software; reading them tells us the reset cause. */
-    if (PCON0bits.nBOR == 0) {
+    if ((boot_pcon0_snapshot & 0x01U) == 0U) {
         errors_word |= ERR_BROWN_OUT;
-        PCON0bits.nBOR = 1;
     }
+}
+
+uint8_t errors_get_boot_pcon0(void) {
+    return boot_pcon0_snapshot;
 }
 
 void errors_set(uint16_t mask) {
     errors_set_raw(mask);
 }
 
+/* Bits whose underlying physical condition is currently true. The host's
+ * OP_CLEAR_ERRORS request is silently refused for these bits so a warning
+ * can't be dismissed before the situation is actually resolved (tank
+ * refilled, voltage recovered, etc). Historical/one-shot bits (CRC,
+ * OVERRUN, BROWN_OUT, HOUSEHOLD_SWITCH_FAILED) have no live condition
+ * and are always clearable. */
+static uint16_t errors_currently_blocked(void) {
+    uint16_t blocked = 0;
+    uint16_t v_household = getVoltage(V_HOUSEHOLD);
+    uint16_t v_starter   = getVoltage(V_STARTER);
+    uint16_t v_mains     = getVoltage(V_MAINS);
+    uint8_t  water       = telemetry_get_water_cached();
+    uint8_t  waste       = telemetry_get_waste_cached();
+    household_state_t hh = getHouseholdState();
+
+    if ((v_household > 0) && (v_household < GEL_ERROR_TRESHOLD))
+        blocked |= ERR_VOLTAGE_HOUSEHOLD_LOW;
+    if ((v_starter > 0) && (v_starter < VOLTAGE_STARTER_LOW_MV))
+        blocked |= ERR_VOLTAGE_STARTER_LOW;
+    if ((hh == ON) && (v_mains > 0) && (v_mains < VOLTAGE_MAINS_LOW_MV))
+        blocked |= ERR_VOLTAGE_MAINS_LOW;
+    if (water <= WATER_LOW_THRESHOLD)         blocked |= ERR_WATER_LOW;
+    if (waste >= WASTE_HIGH_THRESHOLD)        blocked |= ERR_WASTE_HIGH;
+    if (waste >= WASTE_FULL_THRESHOLD)        blocked |= ERR_WASTE_FULL;
+    if (adc_stall_ticks >= ADC_STALL_TICKS)   blocked |= ERR_ADC_STUCK;
+
+    return blocked;
+}
+
 void errors_clear(uint16_t mask) {
+    uint16_t blocked = errors_currently_blocked();
+    uint16_t effective = (uint16_t)(mask & ~blocked);
+
     INTCONbits.GIE = 0;
-    errors_word &= (uint16_t)~mask;
-    /* Reset the rising-edge snapshot for cleared bits so a re-raise can
-     * trigger a fresh OP_EVENT. */
-    errors_last_reported &= (uint16_t)~mask;
+    errors_word &= (uint16_t)~effective;
+    /* Reset the rising-edge snapshot only for bits we actually cleared,
+     * so refused bits don't re-fire EVENT_ERROR_RAISED next telemetry tick. */
+    errors_last_reported &= (uint16_t)~effective;
     INTCONbits.GIE = 1;
 }
 

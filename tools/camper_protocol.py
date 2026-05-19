@@ -5,24 +5,92 @@ Frame: [SOF=0xAA][OPCODE][LEN][PAYLOAD...][CRC_LO][CRC_HI]
 CRC over OPCODE+LEN+PAYLOAD using CRC-16/MCRF4XX (poly 0x1021,
 init 0xFFFF, refin=true, refout=true, xorout=0x0000).
 
-Usage (default port /dev/ttyS0; override with --port /dev/ttyUSB0):
+Global options (precede the subcommand):
+    --port, -p PATH     serial device (default: /dev/ttyS0). Baud is
+                        fixed at 115200.
+
+Subcommands:
+
+    ping [--payload TEXT]
+        Send OP_PING; payload defaults to "PING".
+
+    get-household | get-pump | get-water | get-waste | get-all | version
+    | get-errors
+        Simple status queries, no arguments.
+
+    set-household STATE          STATE = 0 | 1
+    set-pump STATE               STATE = 0 | 1
+    set-neopixel LED COLOR DUTY  LED = 1|2, COLOR = name or numeric,
+                                 DUTY = 0..15
+    get-voltage CHANNEL          CHANNEL = 0..2 (household/mains/starter)
+    clear-errors [MASK]          MASK = 16-bit hex/dec, default 0xFFFF
+
+    subscribe [--stream] [--keepalive SECS]
+        Send OP_SUBSCRIBE. With --stream, continue listening after the
+        ACK (equivalent to running 'subscribe' then 'stream'). --keepalive
+        (default 3.0 s) sets the cadence of automatic re-subscribe; pass 0
+        to disable. The firmware drops back to idle after ~10 s without a
+        keepalive.
+
+    unsubscribe
+        Tell the firmware to drop back to idle (60 s) cadence.
+
+    stream [--keepalive SECS]
+        Listen and decode async frames. Single keypresses inject commands
+        on the same port:
+            p  -> send OP_PING (reply appears inline)
+            q  -> quit (same as Ctrl-C)
+        --keepalive (default 3.0 s) re-sends OP_SUBSCRIBE on that
+        interval. Pass 0 for a silent listener (host sends nothing).
+
+    enter-bootloader --yes
+        Reset the board into the MDFU bootloader. Requires --yes to
+        confirm; the firmware will not respond afterwards.
+
+Examples (default port /dev/ttyS0; override with --port /dev/ttyUSB0):
     python camper_protocol.py ping
     python camper_protocol.py get-household
     python camper_protocol.py set-pump 1
-    python camper_protocol.py subscribe
-    python camper_protocol.py stream                  # listen & decode
+    python camper_protocol.py subscribe --stream
+    python camper_protocol.py stream --keepalive 0    # silent listener
     python camper_protocol.py --port /dev/ttyUSB0 ping
 """
 
 from __future__ import annotations
 
 import argparse
+import select
 import struct
 import sys
+import termios
 import time
+import tty
+from contextlib import contextmanager
 from dataclasses import dataclass
 
 import serial  # pip install pyserial
+
+
+@contextmanager
+def _raw_stdin():
+    """Put stdin in cbreak mode so single keypresses arrive without Enter.
+    Falls through unchanged if stdin is not a TTY (e.g. piped input)."""
+    if not sys.stdin.isatty():
+        yield False
+        return
+    fd = sys.stdin.fileno()
+    saved = termios.tcgetattr(fd)
+    try:
+        tty.setcbreak(fd)
+        yield True
+    finally:
+        termios.tcsetattr(fd, termios.TCSADRAIN, saved)
+
+
+def _read_key_nonblocking() -> str | None:
+    if select.select([sys.stdin], [], [], 0)[0]:
+        return sys.stdin.read(1)
+    return None
 
 
 SOF = 0xAA
@@ -71,6 +139,16 @@ ERROR_BITS = {
     0x0100: "PROTOCOL_CRC",
     0x0200: "PROTOCOL_OVERRUN",
     0x0400: "BROWN_OUT",
+}
+
+STATE_FLAG_BITS = {
+    0x01: "HOUSEHOLD_ON",
+    0x04: "PUMP_ON",
+    0x08: "SWITCH1",
+    0x10: "SWITCH2",
+    0x20: "VALUES_CHANGED",
+    0x40: "ERRORS_ACTIVE",
+    0x80: "SUBSCRIBED",
 }
 
 
@@ -230,9 +308,8 @@ def decode_frame(f: Frame) -> str:
         if f.payload and f.payload[0] == 0x01:
             mask = struct.unpack("<H", f.payload[1:3])[0]
             return f"EVENT ERROR_RAISED mask=0x{mask:04X} bits={decode_errors(mask)}"
-        if f.payload and f.payload[0] == 0x02 and len(f.payload) >= 7:
-            rx_bytes, frames, crc_fails = struct.unpack("<HHH", f.payload[1:7])
-            return f"EVENT DEBUG rx_bytes={rx_bytes} frames_ok={frames} crc_fails={crc_fails}"
+        if f.payload and f.payload[0] == 0x03 and len(f.payload) >= 2:
+            return f"EVENT BOOT_RESET_CAUSE pcon0=0x{f.payload[1]:02X} causes=[{decode_pcon0(f.payload[1])}]"
         return f"EVENT kind={f.payload[0]:02X} body={f.payload[1:].hex()}"
     return f"{f}"
 
@@ -243,11 +320,30 @@ def decode_telemetry(p: bytes) -> str:
     vh, vm, vs, water, waste, flags, errs = struct.unpack("<HHHBBBH", p)
     return (f"TELEMETRY vh={vh}mV vm={vm}mV vs={vs}mV "
             f"water={water}% waste={waste}% "
-            f"flags=0x{flags:02X} errors=0x{errs:04X} [{decode_errors(errs)}]")
+            f"flags=0x{flags:02X} [{decode_state_flags(flags)}] "
+            f"errors=0x{errs:04X} [{decode_errors(errs)}]")
 
 
 def decode_errors(mask: int) -> str:
     return ",".join(name for bit, name in ERROR_BITS.items() if mask & bit) or "-"
+
+
+def decode_state_flags(flags: int) -> str:
+    return ",".join(name for bit, name in STATE_FLAG_BITS.items() if flags & bit) or "-"
+
+
+def decode_pcon0(pcon0: int) -> str:
+    """Decode a PIC16F18045 PCON0 snapshot. Active-low bits trigger when 0;
+    active-high bits trigger when 1."""
+    causes = []
+    if pcon0 & 0x80:           causes.append("STACK_OVERFLOW")
+    if pcon0 & 0x40:           causes.append("STACK_UNDERFLOW")
+    if not (pcon0 & 0x10):     causes.append("WDT")
+    if not (pcon0 & 0x08):     causes.append("MCLR")
+    if not (pcon0 & 0x04):     causes.append("SW_RESET")
+    if not (pcon0 & 0x02):     causes.append("POR")
+    if not (pcon0 & 0x01):     causes.append("BOR")
+    return ",".join(causes) or "-"
 
 
 # ---------- subcommands ----------
@@ -360,20 +456,41 @@ def cmd_stream(link: CamperLink, args) -> None:
     interval to keep the firmware in fast-streaming mode. SUBSCRIBE is
     idempotent: only the first call starts streaming; subsequent calls
     just refresh the firmware's 10s watchdog.
+
+    While streaming, single keypresses inject commands on the same port:
+      p  -> send OP_PING (the reply appears inline in the stream)
+      q  -> quit (same as Ctrl-C)
     """
-    print("Streaming. Press Ctrl-C to stop.")
+    print("Streaming. Keys: [p]=ping  [q]/Ctrl-C=quit")
+    # Use a short read timeout so we can interleave stdin polling without
+    # blocking the serial read for the full configured timeout.
+    saved_timeout = link.ser.timeout
+    link.ser.timeout = 0.05
     last_keepalive = 0.0
     try:
-        while True:
-            now = time.monotonic()
-            if args.keepalive and now - last_keepalive >= args.keepalive:
-                link.send(OP_SUBSCRIBE, bytes([0]))
-                last_keepalive = now
-            data = link.ser.read(64)
-            if data:
-                for f in link.parser.feed_stream(data):
-                    print(f"[{time.strftime('%H:%M:%S')}] {decode_frame(f)}")
+        with _raw_stdin() as raw_ok:
+            while True:
+                now = time.monotonic()
+                if args.keepalive and now - last_keepalive >= args.keepalive:
+                    link.send(OP_SUBSCRIBE, bytes([0]))
+                    last_keepalive = now
+
+                if raw_ok:
+                    key = _read_key_nonblocking()
+                    if key == "p":
+                        link.send(OP_PING, b"PING")
+                        print(f"[{time.strftime('%H:%M:%S')}] -> PING sent")
+                    elif key in ("q", "\x03"):  # q or Ctrl-C
+                        break
+
+                data = link.ser.read(64)
+                if data:
+                    for f in link.parser.feed_stream(data):
+                        print(f"[{time.strftime('%H:%M:%S')}] {decode_frame(f)}")
     except KeyboardInterrupt:
+        pass
+    finally:
+        link.ser.timeout = saved_timeout
         print()
 
 
@@ -399,17 +516,64 @@ SUBCOMMANDS = {
 }
 
 
+SUBCOMMAND_HELP = {
+    "ping":             "Send OP_PING (echo test).",
+    "get-household":    "Query household relay state.",
+    "set-household":    "Set household relay (STATE = 0|1).",
+    "get-pump":         "Query pump relay state.",
+    "set-pump":         "Set pump relay (STATE = 0|1).",
+    "get-voltage":      "Read a voltage channel (CHANNEL = 0..2).",
+    "get-water":        "Query water tank level (percent).",
+    "get-waste":        "Query waste tank level (percent).",
+    "get-all":          "Query household + pump + tanks + voltages in one frame.",
+    "set-neopixel":     "Drive a neopixel (LED COLOR DUTY).",
+    "subscribe":        "Subscribe to 1 s telemetry pushes; --stream keeps listening.",
+    "unsubscribe":      "Stop fast telemetry (back to 60 s idle).",
+    "version":          "Read firmware version (major.minor.patch).",
+    "get-errors":       "Read 16-bit error word.",
+    "clear-errors":     "Clear error bits (MASK = bitmask, default 0xFFFF).",
+    "enter-bootloader": "Reset the chip into the MDFU bootloader (requires --yes).",
+    "stream":           "Listen and decode async frames; p=ping, q=quit.",
+}
+
+
+def _build_epilog() -> str:
+    lines = ["Subcommands (run '<subcommand> --help' for details):"]
+    for name, (_, posargs) in SUBCOMMANDS.items():
+        arg_blurb = " ".join(
+            (a if not a.startswith("--") else
+             f"[{a}{'' if kw.get('action') == 'store_true' else ' VALUE'}]")
+            for a, kw in posargs
+        )
+        sig = f"{name} {arg_blurb}".strip()
+        lines.append(f"  {sig:<40}  {SUBCOMMAND_HELP.get(name, '')}")
+    return "\n".join(lines)
+
+
 def main() -> int:
-    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap = argparse.ArgumentParser(
+        description=__doc__,
+        epilog=_build_epilog(),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
     ap.add_argument("--port", "-p", default="/dev/ttyS0", help="serial port (default: /dev/ttyS0)")
-    sub = ap.add_subparsers(dest="cmd", required=True)
+    sub = ap.add_subparsers(dest="cmd")
     for name, (fn, posargs) in SUBCOMMANDS.items():
-        sp = sub.add_parser(name)
+        sp = sub.add_parser(name, help=SUBCOMMAND_HELP.get(name))
         for argname, kw in posargs:
             sp.add_argument(argname, **kw)
         sp.set_defaults(func=fn)
 
+    # Print full help if no subcommand is given, instead of argparse's terse
+    # "the following arguments are required: cmd" error.
+    if len(sys.argv) == 1:
+        ap.print_help()
+        return 0
+
     args = ap.parse_args()
+    if not args.cmd:
+        ap.print_help()
+        return 0
     link = CamperLink(args.port)
     args.func(link, args)
     return 0

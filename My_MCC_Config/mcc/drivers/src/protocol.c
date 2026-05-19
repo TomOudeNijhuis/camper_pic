@@ -1,15 +1,12 @@
 #include <xc.h>
-#include <string.h>
 #include "../protocol.h"
 #include "../crc16.h"
-#include "../errors.h"
 #include "../../mcc_generated_files/uart/eusart1.h"
 
 typedef enum {
     RX_IDLE = 0,
     RX_GOT_SOF,
     RX_GOT_OPCODE,
-    RX_GOT_LEN,
     RX_PAYLOAD,
     RX_CRC_LO,
     RX_CRC_HI
@@ -17,23 +14,29 @@ typedef enum {
 
 static volatile rx_state_t rx_state = RX_IDLE;
 static volatile uint16_t   rx_crc;
-static volatile uint8_t    rx_opcode;
-static volatile uint8_t    rx_len;
-static volatile uint8_t    rx_payload[PROTOCOL_MAX_PAYLOAD];
 static volatile uint8_t    rx_payload_idx;
 static volatile uint8_t    rx_crc_lo;
 
-static volatile protocol_frame_t rx_slot[2];
-static volatile uint8_t          rx_slot_active;   /* slot index ready for main */
+/* Single RX slot. The ISR assembles incoming bytes directly here, so the
+ * critical path has no payload-copy loop (an XC8 codegen bug at -O2 makes
+ * for-loops inside this ISR's RX_CRC_HI case corrupt the program counter
+ * once the function exceeds ~250 bytes). Main reads via protocol_poll(),
+ * which also copies it out under GIE=0. */
+static volatile protocol_frame_t rx_slot;
 static volatile bool             packet_ready;
 
 static volatile bool    nack_pending;
 static volatile uint8_t nack_pending_reason;
 
-/* Debug counters exposed via OP_DEBUG. Cleared on read. */
-static volatile uint16_t rx_byte_count;
-static volatile uint16_t rx_frame_count;
-static volatile uint16_t rx_crc_fail_count;
+static volatile bool    overrun_pending;
+
+/* Frame-reception watchdog. Armed (set to FRAME_TIMEOUT_TICKS) when we
+ * accept an SOF; decremented every TMR0 tick (~100 ms). If it reaches
+ * zero before the frame completes, the state machine is forced back to
+ * RX_IDLE so a truncated frame doesn't jam the receiver indefinitely.
+ * Zero == disarmed (no frame in flight). */
+#define FRAME_TIMEOUT_TICKS  5U   /* ~500 ms at 100 ms TMR0 cadence */
+static volatile uint8_t frame_timeout_ticks;
 
 static void on_overrun(void);
 static void protocol_on_rx_byte(void);
@@ -43,7 +46,8 @@ void protocol_init(void) {
     rx_payload_idx = 0;
     packet_ready = false;
     nack_pending = false;
-    rx_slot_active = 0;
+    overrun_pending = false;
+    frame_timeout_ticks = 0;
 
     /* Clear any latched OERR left by prior UART activity (the bootloader
      * uses the same EUSART for the firmware transfer and may leave the
@@ -56,120 +60,121 @@ void protocol_init(void) {
     EUSART1_OverrunErrorCallbackRegister(on_overrun);
 }
 
+void protocol_tick_isr(void) {
+    /* Called from the TMR0 callback. If a frame has been mid-flight for
+     * longer than FRAME_TIMEOUT_TICKS, force the state machine back to
+     * IDLE so a truncated or glitched frame doesn't jam the receiver.
+     * Disarmed when frame_timeout_ticks == 0. */
+    if (frame_timeout_ticks > 0) {
+        frame_timeout_ticks--;
+        if (frame_timeout_ticks == 0) {
+            rx_state = RX_IDLE;
+            rx_payload_idx = 0;
+        }
+    }
+}
+
 static void on_overrun(void) {
     /* The MCC EUSART driver detects OERR but doesn't clear it; the receiver
      * stays jammed until CREN is toggled. Do that here so the link recovers
-     * automatically. */
+     * automatically. The errors_set() call is deferred to main context
+     * (see protocol_take_pending_overrun) so the ISR stays minimal. */
     RC1STAbits.CREN = 0;
     RC1STAbits.CREN = 1;
     rx_state = RX_IDLE;
     rx_payload_idx = 0;
-    errors_set(ERR_PROTOCOL_OVERRUN);
+    frame_timeout_ticks = 0;
+    overrun_pending = true;
 }
 
-static void feed_byte(uint8_t b) {
+static void protocol_on_rx_byte(void) {
     uint16_t received;
+    uint8_t b;
 
-    switch (rx_state) {
-        case RX_IDLE:
-            if (b == PROTOCOL_SOF) {
-                rx_crc = CRC16_INIT;
-                rx_payload_idx = 0;
-                rx_state = RX_GOT_SOF;
-            }
-            break;
+    while (EUSART1_IsRxReady()) {
+        b = EUSART1_Read();
 
-        case RX_GOT_SOF:
-            rx_opcode = b;
-            rx_crc = crc16_update(rx_crc, b);
-            rx_state = RX_GOT_OPCODE;
-            break;
+        switch (rx_state) {
+            case RX_IDLE:
+                /* If main hasn't yet picked up the previous frame, drop the
+                 * new one to avoid corrupting rx_slot mid-read. The host
+                 * will time out and retry. */
+                if (b == PROTOCOL_SOF && !packet_ready) {
+                    rx_crc = CRC16_INIT;
+                    rx_payload_idx = 0;
+                    rx_state = RX_GOT_SOF;
+                    frame_timeout_ticks = FRAME_TIMEOUT_TICKS;
+                }
+                break;
 
-        case RX_GOT_OPCODE:
-            if (b > PROTOCOL_MAX_PAYLOAD) {
+            case RX_GOT_SOF:
+                rx_slot.opcode = b;
+                rx_crc = crc16_update(rx_crc, b);
+                rx_state = RX_GOT_OPCODE;
+                break;
+
+            case RX_GOT_OPCODE:
+                if (b > PROTOCOL_MAX_PAYLOAD) {
+                    rx_state = RX_IDLE;
+                    frame_timeout_ticks = 0;
+                    break;
+                }
+                rx_slot.len = b;
+                rx_crc = crc16_update(rx_crc, b);
+                if (b == 0) {
+                    rx_state = RX_CRC_LO;
+                } else {
+                    rx_state = RX_PAYLOAD;
+                }
+                break;
+
+            case RX_PAYLOAD:
+                /* Write directly into the slot payload — no copy loop later.
+                 * One byte per ISR entry; no loop here. */
+                rx_slot.payload[rx_payload_idx] = b;
+                rx_payload_idx++;
+                rx_crc = crc16_update(rx_crc, b);
+                if (rx_payload_idx >= rx_slot.len) {
+                    rx_state = RX_CRC_LO;
+                }
+                break;
+
+            case RX_CRC_LO:
+                rx_crc_lo = b;
+                rx_state = RX_CRC_HI;
+                break;
+
+            case RX_CRC_HI:
+                received = (uint16_t)rx_crc_lo | ((uint16_t)b << 8);
+
+                if (received == rx_crc) {
+                    packet_ready = true;
+                } else {
+                    nack_pending = true;
+                    nack_pending_reason = NACK_BAD_CRC;
+                }
+
+                rx_state = RX_IDLE;
+                frame_timeout_ticks = 0;
+                break;
+
+            default:
                 rx_state = RX_IDLE;
                 break;
-            }
-            rx_len = b;
-            rx_crc = crc16_update(rx_crc, b);
-            if (rx_len == 0) {
-                rx_state = RX_CRC_LO;
-            } else {
-                rx_state = RX_PAYLOAD;
-            }
-            break;
-
-        case RX_PAYLOAD:
-            rx_payload[rx_payload_idx++] = b;
-            rx_crc = crc16_update(rx_crc, b);
-            if (rx_payload_idx >= rx_len) {
-                rx_state = RX_CRC_LO;
-            }
-            break;
-
-        case RX_CRC_LO:
-            rx_crc_lo = b;
-            rx_state = RX_CRC_HI;
-            break;
-
-        case RX_CRC_HI:
-            received = (uint16_t)rx_crc_lo | ((uint16_t)b << 8);
-
-            if (received == rx_crc) {
-                uint8_t slot = (uint8_t)(rx_slot_active ^ 1);
-                uint8_t i;
-                rx_slot[slot].opcode = rx_opcode;
-                rx_slot[slot].len = rx_len;
-                for (i = 0; i < rx_len; i++) {
-                    rx_slot[slot].payload[i] = rx_payload[i];
-                }
-                rx_slot_active = slot;
-                packet_ready = true;
-                rx_frame_count++;
-            } else {
-                nack_pending = true;
-                nack_pending_reason = NACK_BAD_CRC;
-                errors_set(ERR_PROTOCOL_CRC);
-                rx_crc_fail_count++;
-            }
-            rx_state = RX_IDLE;
-            break;
-
-        default:
-            rx_state = RX_IDLE;
-            break;
+        }
     }
-}
-
-/* ISR context: drain whatever is in the EUSART1 RX FIFO. */
-static void protocol_on_rx_byte(void) {
-    while (EUSART1_IsRxReady()) {
-        uint8_t b = EUSART1_Read();
-        rx_byte_count++;
-        feed_byte(b);
-    }
-}
-
-void protocol_get_debug_counts(uint16_t *bytes, uint16_t *frames, uint16_t *crc_fails) {
-    /* Cumulative; do NOT clear on read so the host can spot any change
-     * by simply watching the numbers tick up. */
-    INTCONbits.GIE = 0;
-    *bytes     = rx_byte_count;
-    *frames    = rx_frame_count;
-    *crc_fails = rx_crc_fail_count;
-    INTCONbits.GIE = 1;
 }
 
 bool protocol_poll(protocol_frame_t *out) {
     bool got = false;
     INTCONbits.GIE = 0;
     if (packet_ready) {
-        uint8_t slot = rx_slot_active;
         uint8_t i;
-        out->opcode = rx_slot[slot].opcode;
-        out->len    = rx_slot[slot].len;
-        for (i = 0; i < out->len; i++) {
-            out->payload[i] = rx_slot[slot].payload[i];
+        uint8_t len = rx_slot.len;
+        out->opcode = rx_slot.opcode;
+        out->len    = len;
+        for (i = 0; i < len; i++) {
+            out->payload[i] = rx_slot.payload[i];
         }
         packet_ready = false;
         got = true;
@@ -184,6 +189,17 @@ bool protocol_take_pending_nack(uint8_t *reason) {
     if (nack_pending) {
         *reason = nack_pending_reason;
         nack_pending = false;
+        got = true;
+    }
+    INTCONbits.GIE = 1;
+    return got;
+}
+
+bool protocol_take_pending_overrun(void) {
+    bool got = false;
+    INTCONbits.GIE = 0;
+    if (overrun_pending) {
+        overrun_pending = false;
         got = true;
     }
     INTCONbits.GIE = 1;

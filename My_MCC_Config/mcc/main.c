@@ -36,6 +36,7 @@ static void Timer_Callback(void) {
     neopixel_overrule_tick_isr();
     telemetry_tick_isr();
     errors_tick_isr();
+    protocol_tick_isr();
 
     if (++adc_sample_divider >= ADC_SAMPLE_EVERY_TICKS) {
         adc_sample_divider = 0;
@@ -79,10 +80,29 @@ int main(void) {
     neopixel_setcolor(1, TEAL, 5);
     neopixel_setcolor(2, TEAL, 5);
 
-    INT_OUT_LAT = 1;
-    __delay_ms(25);
-    INT_OUT_LAT = 0;
-    __delay_ms(25);
+    /* Bit-bang the captured PCON0 byte on INT_OUT so the scope can read it
+     * even if the UART event never makes it out. Scheme (MSB first):
+     *   - 50 ms HIGH start pulse
+     *   - 10 ms LOW gap
+     *   - per bit: HIGH for 5 ms (=0) or 25 ms (=1), then 10 ms LOW gap
+     *   - 50 ms HIGH end pulse
+     * A '1' bit is visibly ~5x wider than a '0'. */
+    {
+        uint8_t pcon = errors_get_boot_pcon0();
+        int8_t i;
+        INT_OUT_LAT = 1; __delay_ms(50); INT_OUT_LAT = 0; __delay_ms(10);
+        for (i = 7; i >= 0; i--) {
+            INT_OUT_LAT = 1;
+            if ((pcon >> i) & 1U) {
+                __delay_ms(25);
+            } else {
+                __delay_ms(5);
+            }
+            INT_OUT_LAT = 0;
+            __delay_ms(10);
+        }
+        INT_OUT_LAT = 1; __delay_ms(50); INT_OUT_LAT = 0;
+    }
 
     while (1) {
         if (protocol_poll(&frame)) {
@@ -91,6 +111,13 @@ int main(void) {
 
         if (protocol_take_pending_nack(&nack_reason)) {
             protocol_send_nack(0xFF, nack_reason);
+            if (nack_reason == NACK_BAD_CRC) {
+                errors_set(ERR_PROTOCOL_CRC);
+            }
+        }
+
+        if (protocol_take_pending_overrun()) {
+            errors_set(ERR_PROTOCOL_OVERRUN);
         }
 
         if (SWITCH1_PORT == 0 && switch1_prev == 1) {
@@ -113,7 +140,7 @@ int main(void) {
             switch2_prev = 1;
         }
 
-        (void)adc_sampler_consume();
+        adc_sampler_consume();
         errors_run_detectors();
 
         if (neopixel_tick_pending) {

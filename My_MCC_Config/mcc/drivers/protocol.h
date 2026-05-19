@@ -63,8 +63,7 @@ typedef enum {
 } nack_reason_t;
 
 typedef enum {
-    EVENT_ERROR_RAISED = 0x01,
-    EVENT_DEBUG        = 0x02   /* RX byte/frame/CRC-fail counters */
+    EVENT_ERROR_RAISED = 0x01
 } event_kind_t;
 
 typedef struct {
@@ -88,8 +87,15 @@ void protocol_send_nack(uint8_t op_acked, uint8_t reason);
  * (we don't know which opcode it was -- the frame was corrupt). */
 bool protocol_take_pending_nack(uint8_t *reason);
 
-/* Read and clear the RX debug counters. ISR-safe. */
-void protocol_get_debug_counts(uint16_t *bytes, uint16_t *frames, uint16_t *crc_fails);
+/* Returns and clears a pending RX overrun. Set by the EUSART overrun
+ * callback; consumed by main to latch ERR_PROTOCOL_OVERRUN. */
+bool protocol_take_pending_overrun(void);
+
+/* Tick the inter-byte / frame timeout. Call once per TMR0 period
+ * (~100 ms) from ISR context. If a frame has been in flight too long
+ * (default ~500 ms) the state machine is forced back to RX_IDLE so a
+ * truncated or glitched frame doesn't jam the receiver. */
+void protocol_tick_isr(void);
 
 #ifdef __cplusplus
 }

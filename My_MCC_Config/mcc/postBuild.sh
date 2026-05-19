@@ -16,6 +16,7 @@ PROJECT_NAME=$2
 INPUT_IMAGE_DIR=$3
 INPUT_IMAGE_TYPE=$4
 INPUT_IMAGE_PATH=$INPUT_IMAGE_DIR/$PROJECT_NAME.hex
+BOOTLOADER_HEX_FILE=$INPUT_IMAGE_DIR/bootloader.hex
 UNIFIED_HEX_FILE=$INPUT_IMAGE_DIR/$PROJECT_NAME.unified.hex
 IS_COMBINED=$([ "$5" = "COMBINED" ] && echo true || echo false)
 
@@ -31,6 +32,6 @@ if [ "$IS_DEBUG" = false ]; then
 
     # - Create a combined conifguration
     if [ "$IS_COMBINED" = "true" ]; then
-        /opt/microchip/xc8/v2.46/pic/bin/hexmate r0x2000-0x7FFF,$INPUT_IMAGE_PATH r0-0x1FFF,$UNIFIED_HEX_FILE -o$UNIFIED_HEX_FILE
+        /opt/microchip/xc8/v2.46/pic/bin/hexmate r0x2000-0x7FFF,$INPUT_IMAGE_PATH r0-0x1FFF,$BOOTLOADER_HEX_FILE -o$UNIFIED_HEX_FILE
     fi
 fi
